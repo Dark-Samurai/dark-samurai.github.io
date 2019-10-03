@@ -1,2 +1,2 @@
 # khontkar.github.io
-kişisel site
+khontkar Resmi Kişisel Site
