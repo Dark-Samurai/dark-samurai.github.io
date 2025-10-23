@@ -1,3 +1,3 @@
-# khontkar.github.io
-Khontkar Resmi Kişisel Site
-# Red Keys
+# dark-samurai.github.io
+Dark-Samurai Personal website
+# Dark Samurai
