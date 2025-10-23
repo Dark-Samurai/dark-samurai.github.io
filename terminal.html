@@ -1,20 +1,285 @@
-<style>
-  body {background-color:grey;
-    }
-</style>
-
-<title> khontkar@debian:~$ </title>
-<pre> 
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>khontkar@arch:~$</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #1a1a1a;
+            color: #00ff41;
+            font-family: 'Ubuntu Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Matrix rain effect */
+        #matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.1;
+        }
+        
+        .container {
+            z-index: 10;
+            text-align: center;
+            animation: fadeIn 2s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ascii-art {
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.2;
+            white-space: pre;
+            text-shadow: 0 0 5px #00ff41;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #00ff41; }
+            to { text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41; }
+        }
+        
+        .terminal {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff41, #00cc33, #00ff41);
+            border-radius: 10px;
+            opacity: 0.5;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+        
+        @keyframes borderGlow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        
+        .terminal-line {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        
+        .user {
+            color: #1793D1;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.7; }
+        }
+        
+        .directory {
+            color: #5C5CFF;
+            font-weight: bold;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: #00ff41;
+            animation: blinkCursor 1s infinite;
+            margin-left: 5px;
+        }
+        
+        @keyframes blinkCursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .typing-effect {
+            overflow: hidden;
+            border-right: 2px solid #00ff41;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #00ff41; }
+        }
+        
+        .barry-allen {
+            animation: colorChange 5s infinite;
+        }
+        
+        @keyframes colorChange {
+            0% { color: #FF0000; }
+            20% { color: #FF7F00; }
+            40% { color: #FFFF00; }
+            60% { color: #00FF00; }
+            80% { color: #0000FF; }
+            100% { color: #FF0000; }
+        }
+        
+        .glitch {
+            animation: glitch 2s infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-rain"></canvas>
+    
+    <div class="container">
+        <pre class="ascii-art">
  _    _                 _   _              
 | | _| |__   ___  _ __ | |_| | ____ _ _ __ 
-| |/ / &apos;_ \ / _ \| &apos;_ \| __| |/ / _` | &apos;__|
-|   &lt;| | | | (_) | | | | |_|   &lt; (_| | |   
+| |/ / '_ \ / _ \| '_ \| __| |/ / _` | '__|
+|   <| | | | (_) | | | | |_|   < (_| | |   
 |_|\_\_| |_|\___/|_| |_|\__|_|\_\__,_|_|   
-</pre>
-<pre> 
+        </pre>
+        
+        <pre class="ascii-art barry-allen glitch">
   _   _   _   _   _     _   _   _   _   _  
  / \ / \ / \ / \ / \   / \ / \ / \ / \ / \ 
 ( B | a | r | r | y ) ( A | l | l | e | n )
  \_/ \_/ \_/ \_/ \_/   \_/ \_/ \_/ \_/ \_/ 
-</pre>
-<pre><font color="#FF0000"><b>khontkar@debian</b></font>:<font color="#5C5CFF"><b>~</b></font>$ </pre>
+        </pre>
+        
+        <div class="terminal">
+            <div class="terminal-line">
+                <span class="user">khontkar@arch</span>:<span class="directory">~</span>$&nbsp;
+                <span class="typing-effect">sudo pacman -S awesomeness</span>
+                <span class="cursor"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix-rain');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+        const matrixArray = matrix.split("");
+        
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+        
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px monospace';
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(draw, 35);
+        
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Add interactive terminal commands
+        const commands = [
+            "sudo pacman -S awesomeness",
+            "ls -la /home/khontkar",
+            "cd /var/www/html",
+            "nano awesome.txt",
+            "git push origin master",
+            "chmod 777 universe",
+            "echo 'Hello, World!' > reality.txt",
+            "yay -Syu",
+            "neofetch",
+            "sudo systemctl start awesomeness.service"
+        ];
+        
+        let commandIndex = 0;
+        const typingElement = document.querySelector('.typing-effect');
+        
+        setInterval(() => {
+            commandIndex = (commandIndex + 1) % commands.length;
+            typingElement.textContent = commands[commandIndex];
+            typingElement.style.animation = 'none';
+            setTimeout(() => {
+                typingElement.style.animation = 'typing 3s steps(40, end), blink-caret 0.75s step-end infinite';
+            }, 10);
+        }, 5000);
+        
+        // Add click sound effect (simulated)
+        document.addEventListener('click', () => {
+            const terminal = document.querySelector('.terminal');
+            terminal.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                terminal.style.transform = 'scale(1)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
