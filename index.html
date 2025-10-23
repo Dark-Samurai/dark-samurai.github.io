@@ -1,25 +1,375 @@
-<title>KHONTKAR - Repo (GiTHuB)</title>
-<meta name="description" content="KH0NTK4R Security [DePO]"/>
-<meta name="keywords" content="KH0NTK4R Security"/>
-<meta name="author" content="KHONTKAR"/>
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-<body bgcolor="black">
-<center>
-<title>KHONTKAR - Repo (GiTHuB)</title>
-<link href="http://www.redkeysmusic.com/img/components/redkeys-music-logo.png" rel="icon" type="image/x-icon"/>
-</font></b><iframe width="0" height="0" src="https://www.youtube.com/embed/MKPEZlXY49Q?&amp;autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
-<img style="-webkit-user-select: none;margin: auto;" src="https://avatars1.githubusercontent.com/u/56101811?s=460&amp;v=4">
-<div style="color:white;font:normal normal normal 20pt/normal 'Courier New';"><b>KH0NTK4R Security [DePO]
-</font></div></b>
-<br>
-<div style="color:white;font:normal normal normal 15pt/normal 'Courier New';"><font color="#FF0000"> Web&Hacking Defacer Pentester
-</font></div></b>
-<br>
-<div class="footer"><font style="color:white;font:normal normal normal 15pt/normal 'Courier New';"><font color="#FF0000"> © 2015 - ∞ 
-</font></div></b>
-<br>
-<div class="footer"><font style="color:white;font:normal normal normal 15pt/normal 'Courier New';"><font color="#FF0000"> khontkar.github.io
-</font></div></b>
-<br>
-<img width="30" src="http://www.redkeysmusic.com/img/components/redkeys-music-logo.png">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KHONTKAR - Repo (GiTHuB)</title>
+    <meta name="description" content="KH0NTK4R Security [DePO]"/>
+    <meta name="keywords" content="KH0NTK4R, Security, GitHub, Repo, Pentester"/>
+    <meta name="author" content="KHONTKAR"/>
+    <link rel="icon" href="https://avatars1.githubusercontent.com/u/56101811?s=460&v=4" type="image/x-icon"/>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier Prime', monospace;
+            overflow-x: hidden;
+            cursor: crosshair;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 0, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.1;
+        }
+        
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+        
+        .glitch-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 3px solid #ff0000;
+            box-shadow: 
+                0 0 20px #ff0000,
+                0 0 40px #ff0000,
+                0 0 60px #ff0000;
+            animation: glitch 3s infinite;
+            transition: all 0.3s ease;
+        }
+        
+        .glitch-img:hover {
+            transform: scale(1.1) rotate(360deg);
+            filter: hue-rotate(180deg);
+        }
+        
+        @keyframes glitch {
+            0%, 100% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+            10% { transform: translate(-2px, -2px); }
+            20% { transform: translate(2px, 2px); }
+            30% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            50% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            70% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            90% { transform: translate(-2px, -2px); }
+        }
+        
+        .glitch-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+            animation: glitch 2s infinite;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #ff0000;
+            text-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                0 0 30px #ff0000,
+                0 0 40px #ff0000;
+            animation: flicker 2s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ff0000;
+            margin: 10px 0;
+            text-shadow: 0 0 5px #ff0000;
+            animation: typing 3s steps(30, end);
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #ff0000;
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        .footer {
+            margin: 20px 0;
+            font-size: 1rem;
+            color: #ff0000;
+            text-shadow: 0 0 5px #ff0000;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        
+        .footer:hover {
+            opacity: 1;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        
+        .logo-bottom {
+            width: 40px;
+            height: 40px;
+            margin-top: 20px;
+            animation: rotate 4s linear infinite;
+            filter: drop-shadow(0 0 5px #ff0000);
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff0000, transparent);
+            animation: scanline 8s linear infinite;
+            z-index: 100;
+        }
+        
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+        
+        .binary-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .binary-char {
+            position: absolute;
+            color: #ff0000;
+            font-size: 12px;
+            opacity: 0.3;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+        
+        .social-links {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .social-link {
+            color: #ff0000;
+            font-size: 24px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .social-link:hover {
+            transform: translateY(-5px);
+            text-shadow: 0 0 15px #ff0000;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .subtitle { font-size: 1rem; }
+            .glitch-img { width: 150px; height: 150px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+    <div class="binary-rain" id="binaryRain"></div>
+    
+    <div class="container">
+        <div class="glitch-wrapper">
+            <img class="glitch-img" src="https://avatars1.githubusercontent.com/u/56101811?s=460&v=4" alt="KHONTKAR">
+            <div class="glitch-text"></div>
+        </div>
+        
+        <h1>KH0NTK4R SECURITY [DEP0]</h1>
+        
+        <div class="subtitle">Web&Hacking Defacer Pentester</div>
+        
+        <div class="footer">© 2015 - ∞</div>
+        <div class="footer">khontkar.github.io</div>
+        
+        <div class="social-links">
+            <a href="https://github.com/khontkar" class="social-link" target="_blank">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+            </a>
+        </div>
+        
+        <img class="logo-bottom" src="https://www.redkeysmusic.com/img/components/redkeys-music-logo.png" alt="Red Keys">
+    </div>
+    
+    <audio autoplay loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        // Matrix background
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const matrix = "01";
+        const matrixArray = matrix.split("");
+        
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#ff0000';
+            ctx.font = fontSize + 'px monospace';
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 35);
+        
+        // Binary rain effect
+        function createBinaryRain() {
+            const binaryRain = document.getElementById('binaryRain');
+            const binaryChars = ['0', '1'];
+            
+            for (let i = 0; i < 50; i++) {
+                const binaryChar = document.createElement('div');
+                binaryChar.className = 'binary-char';
+                binaryChar.textContent = binaryChars[Math.floor(Math.random() * binaryChars.length)];
+                binaryChar.style.left = Math.random() * 100 + '%';
+                binaryChar.style.animationDuration = Math.random() * 5 + 5 + 's';
+                binaryChar.style.animationDelay = Math.random() * 5 + 's';
+                binaryRain.appendChild(binaryChar);
+            }
+        }
+        
+        createBinaryRain();
+        
+        // Glitch effect on mouse move
+        document.addEventListener('mousemove', (e) => {
+            const glitchImg = document.querySelector('.glitch-img');
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            glitchImg.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        
+        // Terminal typing effect
+        const phrases = [
+            "Web&Hacking Defacer Pentester",
+            "Security Researcher",
+            "Bug Bounty Hunter",
+            "CTF Player",
+            "Malware Analyst"
+        ];
+        
+        let phraseIndex = 0;
+        const subtitle = document.querySelector('.subtitle');
+        
+        setInterval(() => {
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            subtitle.textContent = phrases[phraseIndex];
+            subtitle.style.animation = 'none';
+            setTimeout(() => {
+                subtitle.style.animation = 'typing 3s steps(30, end)';
+            }, 10);
+        }, 5000);
+        
+        // Window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
