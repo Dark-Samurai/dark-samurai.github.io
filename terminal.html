@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>khontkar@arch:~$</title>
+<meta name="description" content="khontkar@arch — terminal portfolio · security researcher">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0c'/%3E%3Ctext y='72' x='50' text-anchor='middle' font-size='64' font-family='monospace' fill='%2300ff41'%3E%3E_%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   00 · TOKENS
+   ============================================================ */
+:root{
+  --bg:        #0a0a0c;
+  --bg-deep:   #060608;
+  --term-bg:   rgba(6,6,9,.86);
+  --fg:        #c8c8d0;
+  --green:     #00ff41;
+  --green-dim: #00b32e;
+  --blue:      #1793d1;
+  --dir:       #5c5cff;
+  --red:       #ff4455;
+  --yellow:    #ffcc00;
+  --cyan:      #00e5ff;
+  --magenta:   #ff2fb0;
+  --dim:       #55555f;
+  --line:      rgba(0,255,65,.16);
+  --line-soft: rgba(255,255,255,.06);
+  --font:      'Ubuntu Mono','JetBrains Mono','Courier New',monospace;
+  --ease:      cubic-bezier(.19,1,.22,1);
+}
+
+/* Tema varyantları body[data-theme] ile */
+body[data-theme="green"]  { --green:#00ff41; --green-dim:#00b32e; --line:rgba(0,255,65,.16); }
+body[data-theme="amber"]  { --green:#ffb000; --green-dim:#b37a00; --line:rgba(255,176,0,.18); }
+body[data-theme="blue"]   { --green:#38bdff; --green-dim:#1a7bb5; --line:rgba(56,189,255,.18); }
+body[data-theme="red"]    { --green:#ff3b4e; --green-dim:#b32634; --line:rgba(255,59,78,.18); }
+body[data-theme="purple"] { --green:#b14cff; --green-dim:#7a2fb3; --line:rgba(177,76,255,.20); }
+
+/* ============================================================
+   01 · RESET
+   ============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg-deep);
+  color:var(--fg);
+  font-family:var(--font);
+  font-size:15px;
+  line-height:1.55;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  position:relative;
+}
+img{display:block;max-width:100%}
+button,input{font:inherit;color:inherit;background:none;border:none;outline:none}
+::selection{background:var(--green);color:#000}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,255,65,.28);border-radius:9px}
+::-webkit-scrollbar-thumb:hover{background:var(--green)}
+
+/* ============================================================
+   02 · ARKA PLAN KATMANLARI
+   ============================================================ */
+#matrix{
+  position:fixed;inset:0;z-index:0;
+  width:100%;height:100%;
+  opacity:.22;
+  transition:opacity .5s var(--ease);
+  pointer-events:none;
+}
+body.matrix-off #matrix{opacity:0}
+
+.crt-scan{
+  position:fixed;inset:0;z-index:9000;pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 2px,
+    rgba(0,0,0,.28) 3px,
+    rgba(0,0,0,.28) 4px);
+  mix-blend-mode:multiply;
+  opacity:.55;
+}
+.crt-vignette{
+  position:fixed;inset:0;z-index:9001;pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,.82) 100%);
+}
+.crt-flicker{
+  position:fixed;inset:0;z-index:9002;pointer-events:none;
+  background:rgba(0,255,65,.012);
+  animation:flicker 4s steps(3) infinite;
+}
+@keyframes flicker{
+  0%,100%{opacity:.25}
+  33%{opacity:.7}
+  66%{opacity:.4}
+}
+.crt-bar{
+  position:fixed;left:0;top:0;width:100%;height:120px;z-index:9003;pointer-events:none;
+  background:linear-gradient(to bottom, transparent, rgba(0,255,65,.05), transparent);
+  animation:sweep 10s linear infinite;
+}
+@keyframes sweep{
+  0%{transform:translateY(-140px)}
+  100%{transform:translateY(100vh)}
+}
+
+/* ============================================================
+   03 · BOOT EKRANI
+   ============================================================ */
+#boot{
+  position:fixed;inset:0;z-index:9500;
+  background:#000;
+  padding:clamp(20px,4vw,60px);
+  display:flex;flex-direction:column;
+  font-size:14px;
+  transition:opacity .6s var(--ease), visibility .6s;
+  overflow:hidden;
+}
+#boot.done{opacity:0;visibility:hidden}
+.boot-log{
+  flex:1;
+  overflow:hidden;
+  white-space:pre-wrap;
+  word-break:break-word;
+  line-height:1.7;
+  color:#c8c8d0;
+  font-size:13px;
+  text-shadow:0 0 4px rgba(0,255,65,.25);
+}
+.boot-log .ok{color:var(--green)}
+.boot-log .warn{color:var(--yellow)}
+.boot-log .err{color:var(--red)}
+.boot-log .dim{color:var(--dim)}
+.boot-log .bracket{color:var(--dim)}
+.boot-bar{
+  margin-top:20px;height:3px;background:rgba(255,255,255,.08);
+  border-radius:99px;overflow:hidden;flex-shrink:0;
+}
+.boot-bar i{
+  display:block;height:100%;width:0%;
+  background:var(--green);
+  box-shadow:0 0 12px var(--green);
+  transition:width .25s linear;
+}
+.boot-hint{
+  margin-top:14px;font-size:11px;letter-spacing:.2em;
+  color:var(--dim);text-transform:uppercase;flex-shrink:0;
+}
+.boot-hint kbd{
+  color:var(--green);border:1px solid var(--line);
+  padding:1px 7px;border-radius:3px;font-size:10px;
+}
+
+/* ============================================================
+   04 · LOGIN EKRANI
+   ============================================================ */
+#login{
+  position:fixed;inset:0;z-index:9400;
+  background:#000;
+  padding:clamp(20px,4vw,60px);
+  display:none;flex-direction:column;
+  font-size:15px;line-height:2;
+  transition:opacity .5s var(--ease), visibility .5s;
+}
+#login.show{display:flex}
+#login.done{opacity:0;visibility:hidden}
+.login-art{
+  color:var(--green);
+  font-size:11px;
+  line-height:1.15;
+  white-space:pre;
+  text-shadow:0 0 8px rgba(0,255,65,.45);
+  margin-bottom:26px;
+  overflow-x:auto;
+}
+.login-line{color:#c8c8d0;white-space:pre-wrap}
+.login-line .ok{color:var(--green)}
+.login-line .dim{color:var(--dim)}
+.login-input{
+  background:transparent;border:none;outline:none;
+  color:var(--green);
+  font-family:var(--font);font-size:15px;
+  caret-color:var(--green);
+  min-width:200px;
+}
+.login-input::placeholder{color:transparent}
+
+/* ============================================================
+   05 · MASAÜSTÜ
+   ============================================================ */
+#desktop{
+  position:fixed;inset:0;z-index:10;
+  display:none;
+  flex-direction:column;
+  opacity:0;
+  transition:opacity .8s var(--ease);
+}
+#desktop.show{display:flex;opacity:1}
+
+/* Üst bar */
+.topbar{
+  display:flex;align-items:center;gap:18px;
+  padding:8px clamp(12px,2vw,22px);
+  background:rgba(0,0,0,.72);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  font-size:11.5px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  flex-shrink:0;
+  z-index:20;
+}
+.tb-brand{
+  color:var(--green);
+  font-weight:700;
+  letter-spacing:.14em;
+  text-shadow:0 0 10px rgba(0,255,65,.5);
+  white-space:nowrap;
+}
+.tb-brand span{color:var(--blue);opacity:.85}
+.tb-item{
+  display:flex;align-items:center;gap:7px;
+  color:var(--dim);
+  white-space:nowrap;
+}
+.tb-item b{color:var(--fg);font-weight:400}
+.tb-item .led{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:ledPulse 1.8s ease-in-out infinite;
+}
+@keyframes ledPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-spacer{flex:1}
+.tb-bar{
+  width:52px;height:5px;border-radius:99px;
+  background:rgba(255,255,255,.09);overflow:hidden;
+}
+.tb-bar i{
+  display:block;height:100%;width:0%;
+  background:var(--green);
+  box-shadow:0 0 6px var(--green);
+  transition:width .9s var(--ease);
+}
+.tb-clock{color:var(--fg);font-variant-numeric:tabular-nums;letter-spacing:.08em}
+
+/* Çalışma alanı */
+.workspace{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:clamp(10px,2.5vw,34px);
+  min-height:0;
+  position:relative;
+}
+
+/* Terminal penceresi */
+.window{
+  width:min(1120px,100%);
+  height:100%;
+  max-height:100%;
+  background:var(--term-bg);
+  border:1px solid var(--line);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.6),
+    0 30px 90px -30px rgba(0,255,65,.35),
+    inset 0 0 120px rgba(0,255,65,.025);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  position:relative;
+  animation:windowIn .8s var(--ease) both;
+}
+@keyframes windowIn{
+  from{opacity:0;transform:translateY(24px) scale(.985)}
+  to{opacity:1;transform:none}
+}
+.window::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(600px circle at 50% 0%, rgba(0,255,65,.06), transparent 60%);
+}
+
+.win-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;
+  background:linear-gradient(to bottom, rgba(16,16,20,.95), rgba(8,8,11,.95));
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+  position:relative;
+}
+.win-bar .dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.win-bar .dot.r{background:#ff5f57}
+.win-bar .dot.y{background:#febc2e}
+.win-bar .dot.g{background:#28c840}
+.win-title{
+  margin-left:8px;
+  font-size:12px;letter-spacing:.08em;
+  color:var(--dim);
+  white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.win-title b{color:var(--fg);font-weight:400}
+.win-bar-spacer{flex:1}
+.win-bar-btn{
+  width:24px;height:20px;
+  display:grid;place-items:center;
+  color:var(--dim);cursor:pointer;
+  font-size:13px;line-height:1;
+  transition:color .25s;
+}
+.win-bar-btn:hover{color:var(--green)}
+
+/* Terminal gövdesi */
+.term{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  cursor:text;
+}
+.term-body{
+  flex:1;min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:18px 20px 22px;
+  font-size:14px;
+  line-height:1.65;
+  scroll-behavior:smooth;
+}
+.term-body::-webkit-scrollbar{width:8px}
+.term-out{white-space:pre-wrap;word-break:break-word}
+.t-line{display:block;min-height:1.3em}
+.t-line.mt{margin-top:8px}
+.t-line.gap{height:10px}
+
+/* Renkler */
+.c-green{color:var(--green)}
+.c-blue{color:var(--blue)}
+.c-dir{color:var(--dir)}
+.c-red{color:var(--red)}
+.c-yellow{color:var(--yellow)}
+.c-cyan{color:var(--cyan)}
+.c-magenta{color:var(--magenta)}
+.c-dim{color:var(--dim)}
+.c-fg{color:var(--fg)}
+.c-bold{font-weight:700}
+.c-it{font-style:italic}
+
+/* Prompt satırı */
+.prompt-line{
+  display:flex;align-items:flex-start;gap:0;
+  flex-wrap:wrap;
+  margin-top:2px;
+}
+.prompt{
+  white-space:pre;
+  flex-shrink:0;
+  user-select:none;
+}
+.prompt .u{color:var(--blue);font-weight:700}
+.prompt .h{color:var(--green);font-weight:700}
+.prompt .sep{color:var(--fg);opacity:.6}
+.prompt .p{color:var(--dir);font-weight:700}
+.prompt .s{color:var(--green);font-weight:700}
+
+#termInput{
+  flex:1;min-width:40px;
+  background:transparent;border:none;outline:none;
+  color:var(--fg);
+  font-family:var(--font);font-size:14px;
+  line-height:1.65;
+  caret-color:var(--green);
+  padding:0;
+}
+#termInput::placeholder{color:transparent}
+
+/* Cursor efekti (input boşken) */
+.cursor-block{
+  display:inline-block;
+  width:8px;height:1.05em;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  vertical-align:-2px;
+  margin-left:1px;
+  animation:blink 1s steps(2,start) infinite;
+  pointer-events:none;
+}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* Neofetch / htop blokları için özel stiller */
+.t-line.ascii{line-height:1.05}
+
+/* ============================================================
+   06 · ALT BAR (durum)
+   ============================================================ */
+.statusbar{
+  display:flex;align-items:center;gap:14px;
+  padding:6px clamp(12px,2vw,22px);
+  background:rgba(0,0,0,.72);
+  border-top:1px solid var(--line);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--dim);
+  flex-shrink:0;
+}
+.st-item{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.st-item .k{color:var(--dim)}
+.st-item .v{color:var(--fg)}
+.st-item .v.ok{color:var(--green)}
+.st-spacer{flex:1}
+.st-hint{color:var(--dim);opacity:.7}
+.st-hint kbd{
+  color:var(--green);border:1px solid var(--line);
+  padding:0 5px;border-radius:3px;font-size:10px;
+}
+
+/* ============================================================
+   07 · TOAST
+   ============================================================ */
+.toast{
+  position:fixed;left:50%;bottom:70px;
+  transform:translate(-50%,140%);
+  z-index:9700;
+  padding:10px 20px;
+  background:rgba(0,0,0,.94);
+  border:1px solid var(--line);
+  color:var(--green);
+  font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  box-shadow:0 0 34px rgba(0,255,65,.35);
+  transition:transform .5s var(--ease);
+  pointer-events:none;
+  white-space:nowrap;
+  max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+}
+.toast.show{transform:translate(-50%,0)}
+
+/* ============================================================
+   08 · RESPONSIVE
+   ============================================================ */
+@media (max-width:820px){
+  .tb-item.cpu,.tb-item.mem{display:none}
+  .term-body{font-size:13px;padding:14px 14px 18px}
+  #termInput{font-size:13px}
+  .st-hint{display:none}
+}
+@media (max-width:520px){
+  .tb-brand{font-size:10px}
+  .tb-item.uptime{display:none}
+  .term-body{font-size:12.5px}
+  .win-title{display:none}
+}
+
+/* ============================================================
+   09 · REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  .crt-flicker,.crt-bar{display:none}
+}
+</style>
+</head>
+
+<body data-theme="green">
+
+<!-- Arka plan -->
+<canvas id="matrix"></canvas>
+
+<!-- CRT katmanları -->
+<div class="crt-scan"></div>
+<div class="crt-vignette"></div>
+<div class="crt-flicker"></div>
+<div class="crt-bar"></div>
+
+<!-- ══════════════ BOOT ══════════════ -->
+<div id="boot">
+  <pre class="boot-log" id="bootLog"></pre>
+  <div class="boot-bar"><i id="bootBar"></i></div>
+  <div class="boot-hint">
+    <kbd>ENTER</kbd> · <kbd>SPACE</kbd> · <kbd>CLICK</kbd> &nbsp;→&nbsp; atla
+  </div>
+</div>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login">
+  <pre class="login-art" id="loginArt"></pre>
+  <div class="login-line" id="loginLine"></div>
+</div>
+
+<!-- ══════════════ DESKTOP ══════════════ -->
+<div id="desktop">
+
+  <!-- Üst bar -->
+  <div class="topbar">
+    <div class="tb-brand">KH0NTK4R<span>@ARCH</span></div>
+    <div class="tb-item"><span class="led"></span> ONLINE</div>
+    <div class="tb-spacer"></div>
+    <div class="tb-item cpu">CPU <span class="tb-bar"><i id="cpuBar"></i></span></div>
+    <div class="tb-item mem">MEM <span class="tb-bar"><i id="memBar"></i></span></div>
+    <div class="tb-item uptime"><span class="k">UP</span> <b id="upTime">00:00</b></div>
+    <div class="tb-item"><span class="tb-clock" id="clock">--:--:--</span></div>
+  </div>
+
+  <!-- Terminal penceresi -->
+  <div class="workspace">
+    <div class="window">
+      <div class="win-bar">
+        <span class="dot r"></span>
+        <span class="dot y"></span>
+        <span class="dot g"></span>
+        <div class="win-title">
+          <b>khontkar@arch</b>: ~ — zsh — 120×40
+        </div>
+        <div class="win-bar-spacer"></div>
+        <div class="win-bar-btn" id="btnTheme" title="Tema">◐</div>
+        <div class="win-bar-btn" id="btnMatrix" title="Matrix">▦</div>
+        <div class="win-bar-btn" id="btnSound" title="Ses">♪</div>
+      </div>
+
+      <div class="term" id="term">
+        <div class="term-body" id="termBody">
+          <div class="term-out" id="termOut"></div>
+          <div class="prompt-line" id="promptLine">
+            <span class="prompt" id="promptText"></span>
+            <input id="termInput" type="text"
+                   autocomplete="off" autocorrect="off" autocapitalize="off"
+                   spellcheck="false" aria-label="Terminal komut girişi">
+            <span class="cursor-block" id="cursorBlock"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alt bar -->
+  <div class="statusbar">
+    <div class="st-item"><span class="k">NORMAL</span></div>
+    <div class="st-item"><span class="k">UTF-8</span></div>
+    <div class="st-item"><span class="k">unix</span></div>
+    <div class="st-item"><span class="v ok" id="stCmd">ready</span></div>
+    <div class="st-spacer"></div>
+    <div class="st-hint"><kbd>↑↓</kbd> geçmiş · <kbd>TAB</kbd> tamamla · <kbd>Ctrl+L</kbd> temizle · <kbd>help</kbd></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   YARDIMCILAR
+   ============================================================ */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rand  = (a,b) => a + Math.random()*(b-a);
+const randInt = (a,b) => Math.floor(rand(a,b+1));
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const pad = (n, l=2) => String(n).padStart(l,'0');
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const esc = s => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const toastEl = $('#toast');
+let toastTimer;
+function toast(msg, ms=2200){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toastEl.classList.remove('show'), ms);
+}
+
+/* ============================================================
+   SES (Web Audio API)
+   ============================================================ */
+const Sfx = (function(){
+  let ctx = null;
+  let enabled = true;
+
+  function ac(){
+    if (!ctx) {
+      try { ctx = new (window.AudioContext||window.webkitAudioContext)(); }
+      catch(e){ return null; }
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+
+  function tone(freq, dur, type='square', gain=0.04){
+    if (!enabled) return;
+    const c = ac(); if (!c) return;
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    g.gain.value = gain;
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+    osc.connect(g); g.connect(c.destination);
+    osc.start(c.currentTime);
+    osc.stop(c.currentTime + dur);
+  }
+
+  function noise(dur=0.04, gain=0.03){
+    if (!enabled) return;
+    const c = ac(); if (!c) return;
+    const buf = c.createBuffer(1, c.sampleRate*dur, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0;i<data.length;i++) data[i] = (Math.random()*2-1)*(1-i/data.length);
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const g = c.createGain();
+    g.gain.value = gain;
+    src.connect(g); g.connect(c.destination);
+    src.start();
+  }
+
+  return {
+    key(){ noise(0.025, 0.018); },
+    enter(){ tone(1200, 0.05, 'square', 0.03); },
+    beep(){ tone(880, 0.09, 'square', 0.045); },
+    boot(){ tone(440, 0.08, 'sine', 0.05); setTimeout(()=>tone(660,0.08,'sine',0.05),90); setTimeout(()=>tone(880,0.14,'sine',0.05),180); },
+    err(){ tone(180, 0.16, 'sawtooth', 0.045); },
+    toggle(){ enabled = !enabled; return enabled; },
+    isOn(){ return enabled; }
+  };
+})();
+
+/* ============================================================
+   TEMA
+   ============================================================ */
+const THEMES = ['green','amber','blue','red','purple'];
+let themeIdx = 0;
+function setTheme(name){
+  if (!THEMES.includes(name)) return false;
+  document.body.setAttribute('data-theme', name);
+  themeIdx = THEMES.indexOf(name);
+  toast('tema → ' + name);
+  return true;
+}
+function cycleTheme(){
+  themeIdx = (themeIdx + 1) % THEMES.length;
+  document.body.setAttribute('data-theme', THEMES[themeIdx]);
+  toast('tema → ' + THEMES[themeIdx]);
+}
+
+/* ============================================================
+   MATRIX RAIN
+   ============================================================ */
+const Matrix = (function(){
+  const canvas = $('#matrix');
+  const ctx = canvas.getContext('2d');
+  const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ0123456789<>/\\|=+*#$%&@'.split('');
+  const FONT = 15;
+  let W=0, H=0, cols=0, drops=[], running=true, speed=1;
+
+  function resize(){
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    cols = Math.ceil(W/FONT);
+    drops = new Array(cols).fill(0).map(()=>randInt(-60,0));
+    ctx.fillStyle = '#060608';
+    ctx.fillRect(0,0,W,H);
+  }
+
+  function accent(){
+    return getComputedStyle(document.body).getPropertyValue('--green').trim() || '#00ff41';
+  }
+
+  function draw(){
+    if (!running) return;
+    const col = accent();
+    ctx.fillStyle = 'rgba(6,6,8,.08)';
+    ctx.fillRect(0,0,W,H);
+    ctx.font = FONT+'px monospace';
+    ctx.textBaseline = 'top';
+
+    for (let i=0;i<cols;i++){
+      const ch = CHARS[(Math.random()*CHARS.length)|0];
+      const x = i*FONT;
+      const y = drops[i]*FONT;
+
+      if (Math.random() > 0.975){
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = col; ctx.shadowBlur = 12;
+      } else {
+        ctx.fillStyle = col; ctx.shadowBlur = 0;
+      }
+      ctx.globalAlpha = 0.85;
+      ctx.fillText(ch, x, y);
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
+      if (y > H && Math.random() > 0.975) drops[i] = 0;
+      drops[i] += speed;
+    }
+  }
+
+  let last = performance.now(), acc = 0;
+  function loop(now){
+    requestAnimationFrame(loop);
+    if (!running){ last = now; return; }
+    const dt = now - last; last = now; acc += dt;
+    if (acc >= 42){ acc = 0; draw(); }
+  }
+
+  window.addEventListener('resize', resize, { passive:true });
+  document.addEventListener('visibilitychange', ()=>{ running = !document.hidden; });
+
+  resize();
+  if (!REDUCED) requestAnimationFrame(loop);
+
+  return {
+    toggle(){
+      running = !running;
+      document.body.classList.toggle('matrix-off', !running);
+      if (running){ last = performance.now(); }
+      return running;
+    },
+    burst(ms=4000){ speed = 6; setTimeout(()=>{ speed = 1; }, ms); },
+    redraw(){ resize(); }
+  };
+})();
+
+/* ============================================================
+   BOOT SEQUENCE
+   ============================================================ */
+const Boot = (function(){
+  const el   = $('#boot');
+  const log  = $('#bootLog');
+  const bar  = $('#bootBar');
+  let skipped = false, finished = false;
+
+  const lines = [
+    ['Arch Linux 6.7.4-arch1-1 (tty1)', 'dim'],
+    ['', ''],
+    ['[    0.000000] Linux version 6.7.4-arch1-1 (linux@archlinux) (gcc 13.2.1)', 'dim'],
+    ['[    0.000000] Command line: BOOT_IMAGE=/vmlinuz-linux root=UUID=kh0ntk4r rw quiet', 'dim'],
+    ['[    0.142731] ACPI: Core revision 20230628', 'dim'],
+    ['[    0.318204] smpboot: CPU0: AMD Ryzen 9 7950X (family: 0x19)', 'dim'],
+    ['[    0.521883] Memory: 32768M/32768M available', 'dim'],
+    ['[    0.712451] systemd[1]: systemd 255.4-1-arch running in system mode', 'dim'],
+    ['', ''],
+    ['[  OK  ] Created slice Slice /system/getty.', 'ok'],
+    ['[  OK  ] Started Journal Service.', 'ok'],
+    ['[  OK  ] Reached target Basic System.', 'ok'],
+    ['[  OK  ] Started D-Bus System Message Bus.', 'ok'],
+    ['[  OK  ] Started Network Manager.', 'ok'],
+    ['[  OK  ] Reached target Network.', 'ok'],
+    ['[  OK  ] Started OpenSSH Daemon.', 'ok'],
+    ['[  OK  ] Started firewalld - dynamic firewall daemon.', 'ok'],
+    ['[  OK  ] Reached target Multi-User System.', 'ok'],
+    ['[  OK  ] Reached target Graphical Interface.', 'ok'],
+    ['[  OK  ] Started khontkar security daemon (k-sec.service).', 'ok'],
+    ['[ WARN ] Unauthorized access attempts are logged.', 'warn'],
+    ['[ WARN ] All activity on this system is monitored.', 'warn'],
+    ['', ''],
+    ['khontkar-arch login: ', 'ok']
+  ];
+
+  function render(full){
+    log.innerHTML = '';
+    const upto = full ? lines.length : 0;
+    for (let i=0;i<upto;i++){
+      const [txt, cls] = lines[i];
+      const span = document.createElement('span');
+      if (cls) span.className = cls;
+      span.textContent = txt + '\n';
+      log.appendChild(span);
+    }
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function finish(){
+    if (finished) return;
+    finished = true;
+    el.classList.add('done');
+    setTimeout(()=>{ el.style.display='none'; Login.start(); }, 620);
+  }
+
+  function skip(){
+    if (finished) return;
+    skipped = true;
+    render(true);
+    bar.style.width = '100%';
+    setTimeout(finish, 160);
+  }
+
+  el.addEventListener('click', skip);
+  window.addEventListener('keydown', skip, { once:true });
+
+  async function run(){
+    if (REDUCED){ skip(); return; }
+    bar.style.transition = 'width 1.9s linear';
+    requestAnimationFrame(()=>{ bar.style.width = '100%'; });
+    for (let i=0;i<lines.length;i++){
+      if (skipped) return;
+      const [txt, cls] = lines[i];
+      const span = document.createElement('span');
+      if (cls) span.className = cls;
+      span.textContent = txt + '\n';
+      log.appendChild(span);
+      log.scrollTop = log.scrollHeight;
+      const delay = txt === '' ? 20 : rand(90, 220);
+      await sleep(delay);
+    }
+    Sfx.boot();
+    await sleep(500);
+    finish();
+  }
+
+  return { run };
+})();
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+const Login = (function(){
+  const el   = $('#login');
+  const art  = $('#loginArt');
+  const line = $('#loginLine');
+  let stage = 0;   // 0=user 1=pass 2=done
+  let username = '';
+
+  const LOGO = [
+    '                   -`                 ',
+    '                  .o+`                ',
+    '                 `ooo/                ',
+    '                `+oooo:               ',
+    '               `+oooooo:              ',
+    '               -+oooooo+:             ',
+    '             `/:-:++oooo+:            ',
+    '            `/++++/+++++++:           ',
+    '           `/++++++++++++++:          ',
+    '          `/+++ooooooooooooo/`        ',
+    '         ./ooosssso++osssssso+`       ',
+    '        .oossssso-````/ossssss+`      ',
+    '       -osssssso.      :ssssssso.     ',
+    '      :osssssss/        osssso+++.    ',
+    '     /ossssssss/        +ssssooo/-    ',
+    '   `/ossssso+/:-        -:/+osssso+-  ',
+    '  `+sso+:-`                 `.-/+oso: ',
+    ' `++:.                           `-/  ',
+    ' .`                                 `/'
+  ].join('\n');
+
+  function updatePrompt(){
+    line.innerHTML = '';
+    if (stage === 0){
+      line.appendChild(document.createTextNode('\nkhontkar-arch login: '));
+    } else if (stage === 1){
+      line.appendChild(document.createTextNode('Password: '));
+    }
+  }
+
+  function appendText(t){
+    line.appendChild(document.createTextNode(t));
+  }
+
+  function start(){
+    el.classList.add('show');
+    if (REDUCED){
+      art.textContent = LOGO;
+    } else {
+      let i = 0;
+      (function draw(){
+        if (i <= LOGO.length){
+          art.textContent = LOGO.slice(0, i);
+          i += 2;
+          setTimeout(draw, 8);
+        } else {
+          art.textContent = LOGO;
+        }
+      })();
+    }
+    stage = 0;
+    username = '';
+    updatePrompt();
+    setTimeout(()=>{
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'login-input';
+      inp.id = 'loginInput';
+      inp.autocomplete = 'off';
+      inp.spellcheck = false;
+      line.appendChild(inp);
+      inp.focus();
+      bindInput(inp);
+    }, 500);
+  }
+
+  function bindInput(inp){
+    inp.addEventListener('keydown', async e => {
+      if (e.key === 'Enter'){
+        const val = inp.value.trim();
+        Sfx.enter();
+
+        if (stage === 0){
+          username = val || 'khontkar';
+          inp.remove();
+          line.innerHTML = '';
+          appendText('\nPassword: ');
+          const pin = document.createElement('input');
+          pin.type = 'password';
+          pin.className = 'login-input';
+          pin.autocomplete = 'off';
+          line.appendChild(pin);
+          pin.focus();
+          stage = 1;
+          bindInput(pin);
+        } else if (stage === 1){
+          inp.remove();
+          stage = 2;
+          line.innerHTML = '';
+          const now = new Date();
+          const t = now.toLocaleString('tr-TR');
+          appendText('Last login: ' + t + ' on tty1\n');
+          appendText('Welcome to Arch Linux (kernel 6.7.4-arch1-1)\n\n');
+          await sleep(500);
+          el.classList.add('done');
+          setTimeout(()=>{
+            el.style.display = 'none';
+            Desktop.start(username);
+          }, 500);
+        }
+      } else if (e.key.length === 1){
+        Sfx.key();
+      }
+    });
+  }
+
+  return { start };
+})();
+
+/* ============================================================
+   DOSYA SİSTEMİ
+   ============================================================ */
+const FS = (function(){
+  const tree = {
+    type:'dir', children: {
+      'home': { type:'dir', children: {
+        'khontkar': { type:'dir', children: {
+          'readme.txt': { type:'file', content:
+`# khontkar@arch
+
+Merhaba. Ben khontkar — güvenlik araştırmacısı, pentester, defacer.
+
+Bu terminal, kişisel portfolyomun bir parçası.
+Gerçek bir kabuk değil ama işini görür.
+
+  → 'help'       komut listesi
+  → 'neofetch'   sistem özeti
+  → 'projects'   projelere göz at
+  → 'contact'    iletişim
+
+Saygılar.
+- khontkar
+`},
+          'notes.md': { type:'file', content:
+`# Notlar
+
+- [x] Recon suite v2 yayınlandı
+- [x] Web shell arayüzü refactor
+- [ ] Log analyzer — parquet desteği
+- [ ] Payload lab dokümantasyonu
+- [ ] CTF writeup serisi
+
+NOT: Tüm testler yalnızca yetkili sistemlerde.
+`},
+          '.secret': { type:'file', content:
+`Tebrikler, gizli dosyayı buldun.
+
+  flag{kh0ntk4r_r3p0_2025}
+
+Ama söyleme kimseye. 🤫
+`},
+          'tools': { type:'dir', children: {
+            'recon.sh': { type:'file', content:
+`#!/usr/bin/env bash
+# recon.sh — subdomain + port tarama
+# kullanım: ./recon.sh <domain>
+
+set -euo pipefail
+
+DOMAIN="\${1:-}"
+[ -z "$DOMAIN" ] && { echo "usage: $0 <domain>"; exit 1; }
+
+echo "[*] hedef: $DOMAIN"
+echo "[*] subdomain enum..."
+subfinder -d "$DOMAIN" -silent | httpx -silent -title
+
+echo "[*] port tarama..."
+naabu -host "$DOMAIN" -top-ports 1000 -silent
+
+echo "[+] bitti."
+`},
+            'exploit.py': { type:'file', content:
+`#!/usr/bin/env python3
+"""exploit.py — lab ortamı için PoC"""
+import sys, requests
+
+def poc(target):
+    print(f"[*] hedef: {target}")
+    r = requests.get(target, timeout=5)
+    print(f"[*] status: {r.status_code}")
+    if "vulnerable" in r.text.lower():
+        print("[+] zafiyet doğrulandı")
+        return True
+    print("[-] zafiyet bulunamadı")
+    return False
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("usage: exploit.py <url>")
+        sys.exit(1)
+    poc(sys.argv[1])
+`}
+          }},
+          'projects': { type:'dir', children: {
+            'khontkar.github.io': { type:'dir', children: {
+              'index.html': { type:'file', content:
+`<!DOCTYPE html>
+<html>
+<head><title>khontkar</title></head>
+<body>
+  <h1>khontkar@arch</h1>
+  <p>Security researcher · pentester</p>
+</body>
+</html>
+`}
+            }},
+            'web-shell': { type:'dir', children: {
+              'shell.php': { type:'file', content:
+`<?php
+// Yetkili testler için minimal web shell
+// KULLANIM: yalnızca izinli sistemlerde
+if (!isset($_GET['c'])) { die('kh0ntk4r'); }
+echo "<pre>";
+system($_GET['c']);
+echo "</pre>";
+`}
+            }}
+          }}
+        }}
+      }},
+      'etc': { type:'dir', children: {
+        'hostname': { type:'file', content:'khontkar-arch\n' },
+        'os-release': { type:'file', content:
+`NAME="Arch Linux"
+PRETTY_NAME="Arch Linux"
+ID=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;23;147;209"
+HOME_URL="https://archlinux.org/"
+DOCUMENTATION_URL="https://wiki.archlinux.org/"
+LOGO=archlinux-logo
+`},
+        'passwd': { type:'file', content:
+`root:x:0:0:root:/root:/bin/bash
+khontkar:x:1000:1000:khontkar:/home/khontkar:/bin/zsh
+guest:x:1001:1001:guest:/home/guest:/bin/bash
+`}
+      }},
+      'var': { type:'dir', children: {
+        'log': { type:'dir', children: {
+          'auth.log': { type:'file', content:
+`Jan  1 00:00:01 khontkar-arch sshd[1337]: Server listening on 0.0.0.0 port 22.
+Jan  1 00:00:02 khontkar-arch sshd[1337]: Server listening on :: port 22.
+Jan  1 00:00:15 khontkar-arch sudo: khontkar : TTY=pts/0 ; PWD=/home/khontkar ; USER=root ; COMMAND=/usr/bin/pacman -Syu
+Jan  1 00:01:22 khontkar-arch sshd[2048]: Failed password for invalid user admin from 10.0.0.99 port 51234 ssh2
+Jan  1 00:01:25 khontkar-arch sshd[2048]: Failed password for invalid user admin from 10.0.0.99 port 51236 ssh2
+Jan  1 00:01:30 khontkar-arch sshd[2048]: Connection closed by invalid user admin 10.0.0.99 port 51236 [preauth]
+Jan  1 00:02:11 khontkar-arch systemd[1]: Started khontkar security daemon.
+`}
+        }}
+      }},
+      'root': { type:'dir', children: {
+        'flag.txt': { type:'file', content:
+`Buraya kadar gelebildiysen...
+
+  flag{r00t_4cc3ss_gr4nt3d}
+
+Ama gerçek hayatta bu kadar kolay değil. 😉
+`}
+      }}
+    }
+  };
+
+  /* Yardımcı: yolu normalize et */
+  function normalize(path, cwd){
+    if (!path) return cwd;
+    if (path === '~') return '/home/khontkar';
+    if (path.startsWith('~/')) path = '/home/khontkar/' + path.slice(2);
+    let parts;
+    if (path.startsWith('/')) parts = path.split('/').filter(Boolean);
+    else parts = (cwd + '/' + path).split('/').filter(Boolean);
+
+    const stack = [];
+    for (const p of parts){
+      if (p === '.') continue;
+      if (p === '..') stack.pop();
+      else stack.push(p);
+    }
+    return '/' + stack.join('/');
+  }
+
+  function get(path){
+    const parts = path.split('/').filter(Boolean);
+    let node = tree;
+    for (const p of parts){
+      if (!node.children || !node.children[p]) return null;
+      node = node.children[p];
+    }
+    return node;
+  }
+
+  function list(path){
+    const node = get(path);
+    if (!node) return null;
+    if (node.type !== 'dir') return null;
+    return Object.keys(node.children).sort((a,b)=>{
+      const A = node.children[a], B = node.children[b];
+      if (A.type !== B.type) return A.type === 'dir' ? -1 : 1;
+      return a.localeCompare(b);
+    }).map(name => ({ name, type: node.children[name].type }));
+  }
+
+  function read(path){
+    const node = get(path);
+    if (!node || node.type !== 'file') return null;
+    return node.content;
+  }
+
+  return { normalize, get, list, read, tree };
+})();
+
+/* ============================================================
+   TERMINAL
+   ============================================================ */
+const Term = (function(){
+  const body   = $('#termBody');
+  const out    = $('#termOut');
+  const input  = $('#termInput');
+  const promptTxt = $('#promptText');
+  const cursorBlock = $('#cursorBlock');
+  const stCmd  = $('#stCmd');
+  const term   = $('#term');
+
+  const state = {
+    user: 'khontkar',
+    host: 'arch',
+    cwd: '/home/khontkar',
+    history: [],
+    histIdx: -1,
+    bootTime: Date.now(),
+    busy: false,
+    startTime: Date.now()
+  };
+
+  /* ---------- Prompt ---------- */
+  function shortPath(p){
+    const home = '/home/' + state.user;
+    if (p === home) return '~';
+    if (p.startsWith(home + '/')) return '~' + p.slice(home.length);
+    return p;
+  }
+  function buildPrompt(){
+    return '<span class="u">' + esc(state.user) + '</span>' +
+           '<span class="sep">@</span>' +
+           '<span class="h">' + esc(state.host) + '</span>' +
+           '<span class="sep">:</span>' +
+           '<span class="p">' + esc(shortPath(state.cwd)) + '</span>' +
+           '<span class="s">$</span> ';
+  }
+  function refreshPrompt(){
+    promptTxt.innerHTML = buildPrompt();
+    cursorBlock.style.display = input.value.length ? 'none' : 'inline-block';
+  }
+
+  /* ---------- Çıktı ---------- */
+  function line(html, cls){
+    const span = document.createElement('span');
+    span.className = 't-line' + (cls ? ' ' + cls : '');
+    span.innerHTML = html;
+    out.appendChild(span);
+    scroll();
+    return span;
+  }
+  function text(t, cls){
+    return line(esc(t), cls);
+  }
+  function blank(){ line('&nbsp;'); }
+  function scroll(){ body.scrollTop = body.scrollHeight; }
+  function clear(){ out.innerHTML = ''; }
+
+  function colorize(str){
+    // Basit markdown-benzeri renklendirme yok — düz metin
+    return esc(str);
+  }
+
+  /* ---------- Gecikmeli yazma (uzun çıktılar için) ---------- */
+  async function typeLines(lines, delay=35){
+    for (const ln of lines){
+      if (typeof ln === 'string') text(ln);
+      else if (ln && ln.html) line(ln.html, ln.cls);
+      await sleep(delay);
+    }
+  }
+
+  /* ---------- ASCII Banner ---------- */
+  const BANNER = [
+    ' _    _                 _   _              ',
+    '| | _| |__   ___  _ __ | |_| | ____ _ _ __  ',
+    "| |/ / '_ \\ / _ \\| '_ \\| __| |/ / _` | '__| ",
+    '|   <| | | | (_) | | | | |_|   < (_| | |    ',
+    '|_|\\_\\_| |_|\\___/|_| |_|\\__|_|\\_\\__,_|_|    '
+  ].join('\n');
+
+  /* ---------- KOMUTLAR ---------- */
+  const CMDS = {};
+
+  CMDS.help = {
+    desc: 'komut listesi',
+    run(){
+      line('<span class="c-green c-bold">KULLANILABILIR KOMUTLAR</span>');
+      blank();
+      const groups = [
+        ['DOSYA SİSTEMİ', ['ls','cd','pwd','cat','tree','stat']],
+        ['SİSTEM', ['whoami','hostname','uname','date','uptime','free','df','ps','htop','neofetch']],
+        ['ARAÇLAR', ['echo','clear','history','man','which','grep','wc','head','tail']],
+        ['EĞLENCE', ['banner','fortune','cowsay','figlet','sl','sudo','rm']],
+        ['GÖRSEL', ['theme','matrix','sound','banner','neofetch']],
+        ['DİĞER', ['projects','contact','skills','exit','reboot']]
+      ];
+      for (const [g, cmds] of groups){
+        line('<span class="c-yellow">' + g + '</span>');
+        for (const c of cmds){
+          const cmd = CMDS[c];
+          const desc = cmd ? cmd.desc : '';
+          line('  <span class="c-green">' + c.padEnd(12,' ') + '</span>' +
+               '<span class="c-dim">' + esc(desc) + '</span>');
+        }
+        blank();
+      }
+      line('<span class="c-dim">İpucu: TAB ile tamamla, ↑↓ ile geçmiş.</span>');
+    }
+  };
+
+  CMDS.ls = {
+    desc: 'dizin listele',
+    run(args){
+      let target = args[0] || state.cwd;
+      const path = FS.normalize(target, state.cwd);
+      const items = FS.list(path);
+
+      if (!items){
+        if (FS.get(path) && FS.get(path).type === 'file'){
+          line('<span class="c-fg">' + esc(target) + '</span>');
+          return;
+        }
+        line('<span class="c-red">ls: ' + esc(target) + ': böyle bir dosya ya da dizin yok</span>');
+        return;
+      }
+
+      if (!items.length){ return; }
+
+      // Renkli, sütunlu liste
+      const out2 = items.map(it => {
+        if (it.type === 'dir') return '<span class="c-dir c-bold">' + esc(it.name) + '/</span>';
+        if (it.name.startsWith('.')) return '<span class="c-dim">' + esc(it.name) + '</span>';
+        if (/\.(sh|py|php|js)$/.test(it.name)) return '<span class="c-green">' + esc(it.name) + '</span>';
+        return '<span class="c-fg">' + esc(it.name) + '</span>';
+      });
+      line(out2.join('   '));
+    }
+  };
+
+  CMDS.cd = {
+    desc: 'dizin değiştir',
+    run(args){
+      const target = args[0] || '~';
+      const path = FS.normalize(target, state.cwd);
+      const node = FS.get(path);
+      if (!node){
+        line('<span class="c-red">cd: ' + esc(target) + ': böyle bir dizin yok</span>');
+        return;
+      }
+      if (node.type !== 'dir'){
+        line('<span class="c-red">cd: ' + esc(target) + ': bir dizin değil</span>');
+        return;
+      }
+      state.cwd = path;
+      refreshPrompt();
+    }
+  };
+
+  CMDS.pwd = { desc: 'çalışma dizini', run(){ line(state.cwd); } };
+
+  CMDS.cat = {
+    desc: 'dosya içeriği',
+    run(args){
+      if (!args.length){
+        line('<span class="c-red">cat: eksik operand</span>');
+        return;
+      }
+      for (const a of args){
+        const path = FS.normalize(a, state.cwd);
+        const content = FS.read(path);
+        if (content === null){
+          line('<span class="c-red">cat: ' + esc(a) + ': böyle bir dosya yok</span>');
+        } else {
+          content.split('\n').forEach(l => text(l));
+        }
+      }
+    }
+  };
+
+  CMDS.tree = {
+    desc: 'dizin ağacı',
+    run(args){
+      const path = FS.normalize(args[0] || state.cwd, state.cwd);
+      const node = FS.get(path);
+      if (!node || node.type !== 'dir'){
+        line('<span class="c-red">tree: ' + esc(args[0] || path) + ': geçersiz</span>');
+        return;
+      }
+      line('<span class="c-dir">' + esc(path) + '</span>');
+      const walk = (n, prefix) => {
+        const keys = Object.keys(n.children).sort((a,b)=>{
+          const A=n.children[a],B=n.children[b];
+          if (A.type!==B.type) return A.type==='dir'?-1:1;
+          return a.localeCompare(b);
+        });
+        keys.forEach((k,i)=>{
+          const last = i === keys.length - 1;
+          const child = n.children[k];
+          const branch = last ? '└── ' : '├── ';
+          const cls = child.type === 'dir' ? 'c-dir c-bold' : 'c-fg';
+          line('  ' + prefix + branch + '<span class="' + cls + '">' + esc(k) + (child.type==='dir'?'/':'') + '</span>');
+          if (child.type === 'dir') walk(child, prefix + (last ? '    ' : '│   '));
+        });
+      };
+      walk(node, '');
+    }
+  };
+
+  CMDS.stat = {
+    desc: 'dosya bilgisi',
+    run(args){
+      if (!args.length){ line('<span class="c-red">stat: eksik operand</span>'); return; }
+      const path = FS.normalize(args[0], state.cwd);
+      const node = FS.get(path);
+      if (!node){ line('<span class="c-red">stat: ' + esc(args[0]) + ': yok</span>'); return; }
+      const size = node.type === 'file' ? node.content.length : 4096;
+      line('  File: ' + esc(args[0]));
+      line('  Size: ' + size + '  Blocks: ' + Math.ceil(size/512));
+      line('  Type: ' + (node.type === 'dir' ? 'directory' : 'regular file'));
+    }
+  };
+
+  CMDS.whoami = { desc: 'kullanıcı adı', run(){ line(state.user); } };
+
+  CMDS.hostname = { desc: 'makine adı', run(){ line(state.host); } };
+
+  CMDS.uname = {
+    desc: 'sistem bilgisi',
+    run(args){
+      if (args.includes('-a')){
+        line('Linux khontkar-arch 6.7.4-arch1-1 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux');
+      } else {
+        line('Linux');
+      }
+    }
+  };
+
+  CMDS.date = {
+    desc: 'tarih/saat',
+    run(){ line(new Date().toString()); }
+  };
+
+  CMDS.uptime = {
+    desc: 'çalışma süresi',
+    run(){
+      const s = Math.floor((Date.now() - state.startTime)/1000);
+      const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+      const load = (Math.random()*0.8+0.1).toFixed(2);
+      line(' ' + new Date().toLocaleTimeString() + '  up ' + h + ':' + pad(m) +
+           ',  1 user,  load average: ' + load + ', ' + (load*0.9).toFixed(2) + ', ' + (load*0.8).toFixed(2));
+    }
+  };
+
+  CMDS.free = {
+    desc: 'bellek bilgisi',
+    run(){
+      line('               total        used        free      shared  buff/cache   available');
+      line('Mem:           32Gi        11Gi       4.2Gi       512Mi        17Gi        19Gi');
+      line('Swap:         8.0Gi       128Mi       7.9Gi');
+    }
+  };
+
+  CMDS.df = {
+    desc: 'disk bilgisi',
+    run(){
+      line('Filesystem      Size  Used Avail Use% Mounted on');
+      line('dev             16G     0   16G   0% /dev');
+      line('run             16G  1.2M   16G   1% /run');
+      line('/dev/nvme0n1p2 954G  412G  494G  46% /');
+      line('tmpfs           16G     0   16G   0% /dev/shm');
+      line('/dev/nvme0n1p1 511M   88M  424M  18% /boot');
+    }
+  };
+
+  CMDS.ps = {
+    desc: 'süreç listesi',
+    run(){
+      line('  PID TTY          TIME CMD');
+      line(' 1337 pts/0    00:00:00 zsh');
+      line(' 1401 pts/0    00:00:00 sshd');
+      line(' 1502 pts/0    00:00:00 khontkar-sec');
+      line(' 1623 pts/0    00:00:00 htop');
+      line(' 1701 pts/0    00:00:00 ps');
+    }
+  };
+
+  CMDS.htop = {
+    desc: 'süreç izleyici',
+    run(){
+      line('<span class="c-green c-bold">  1  [|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  32.4%]</span>  Tasks: 142, 312 thr; 2 running');
+      line('<span class="c-green c-bold">  2  [|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  28.1%]</span>  Load average: 0.42 0.38 0.31');
+      line('<span class="c-green c-bold">  3  [|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  19.7%]</span>  Uptime: ' + (() => { const s=Math.floor((Date.now()-state.startTime)/1000); return Math.floor(s/3600)+':'+pad(Math.floor((s%3600)/60)); })());
+      line('<span class="c-green c-bold">  4  [|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  22.0%]</span>');
+      line('<span class="c-green">  Mem[||||||||||||||||||||||||||||||||||||||||||||||||  11.2G/32.0G]</span>');
+      line('<span class="c-green">  Swp[                                                  128M/8.00G]</span>');
+      blank();
+      line('  <span class="c-yellow c-bold">PID USER      PRI  NI  VIRT   RES   S CPU% MEM%   TIME+  Command</span>');
+      line(' 1623 khontkar   20   0  9.4G  1.2G   R 12.4  3.8  1:42.11 khontkar-sec');
+      line(' 1401 root       20   0  128M   12M   S  0.7  0.0  0:04.31 sshd');
+      line(' 1701 khontkar   20   0  6.1G  2.4G   S  2.1  7.5  0:28.92 firefox');
+      line(' 1812 khontkar   20   0  1.2G   88M   S  0.3  0.3  0:01.22 code');
+    }
+  };
+
+  CMDS.neofetch = {
+    desc: 'sistem özeti',
+    run(){
+      const logo = [
+        '                   -`                 ',
+        '                  .o+`                ',
+        '                 `ooo/                ',
+        '                `+oooo:               ',
+        '               `+oooooo:              ',
+        '               -+oooooo+:             ',
+        '             `/:-:++oooo+:            ',
+        '            `/++++/+++++++:           ',
+        '           `/++++++++++++++:          ',
+        '          `/+++ooooooooooooo/`        ',
+        '         ./ooosssso++osssssso+`       ',
+        '        .oossssso-````/ossssss+`      ',
+        '       -osssssso.      :ssssssso.     ',
+        '      :osssssss/        osssso+++.    ',
+        '     /ossssssss/        +ssssooo/-    ',
+        '   `/ossssso+/:-        -:/+osssso+-  ',
+        '  `+sso+:-`                 `.-/+oso: ',
+        ' `++:.                           `-/  ',
+        ' .`                                 `/'
+      ];
+      const info = [
+        ['OS',     'Arch Linux x86_64'],
+        ['Host',   'khontkar-arch'],
+        ['Kernel', '6.7.4-arch1-1'],
+        ['Uptime', (() => { const s=Math.floor((Date.now()-state.startTime)/1000); return Math.floor(s/60)+' mins'; })()],
+        ['Shell',  'zsh 5.9'],
+        ['WM',     'dwm'],
+        ['CPU',    'AMD Ryzen 9 7950X (32) @ 5.7GHz'],
+        ['GPU',    'NVIDIA RTX 4090'],
+        ['Memory', '11.2GiB / 32.0GiB'],
+        ['Disk',   '412G / 954G (46%)']
+      ];
+
+      const n = Math.max(logo.length, info.length);
+      for (let i=0;i<n;i++){
+        const l = (logo[i]||'').padEnd(38,' ');
+        const inf = info[i];
+        const right = inf
+          ? '<span class="c-green c-bold">' + inf[0] + '</span><span class="c-dim">: </span><span class="c-fg">' + esc(inf[1]) + '</span>'
+          : '';
+        line('<span class="c-green ascii">' + esc(l) + '</span>' + right);
+      }
+      blank();
+      // Renk paleti
+      line('  <span style="background:#000;color:#000">███</span>' +
+           '<span style="background:#00ff41;color:#00ff41">███</span>' +
+           '<span style="background:#00b32e;color:#00b32e">███</span>' +
+           '<span style="background:#1793d1;color:#1793d1">███</span>' +
+           '<span style="background:#5c5cff;color:#5c5cff">███</span>' +
+           '<span style="background:#ff4455;color:#ff4455">███</span>' +
+           '<span style="background:#ffcc00;color:#ffcc00">███</span>' +
+           '<span style="background:#c8c8d0;color:#c8c8d0">███</span>');
+    }
+  };
+
+  CMDS.echo = {
+    desc: 'metin yazdır',
+    run(args){
+      const txt = args.join(' ');
+      if (txt.startsWith('"') && txt.endsWith('"')) line(txt.slice(1,-1));
+      else line(txt);
+    }
+  };
+
+  CMDS.clear = { desc: 'ekranı temizle', run(){ clear(); } };
+
+  CMDS.history = {
+    desc: 'komut geçmişi',
+    run(){
+      if (!state.history.length){ line('<span class="c-dim">(boş)</span>'); return; }
+      state.history.forEach((h,i)=>{
+        line('  <span class="c-dim">' + String(i+1).padStart(4,' ') + '</span>  ' + esc(h));
+      });
+    }
+  };
+
+  CMDS.man = {
+    desc: 'kılavuz',
+    run(args){
+      if (!args.length){
+        line('Ne kılavuzu? Örnek: <span class="c-green">man ls</span>');
+        return;
+      }
+      const cmd = args[0];
+      const c = CMDS[cmd];
+      if (!c){
+        line('<span class="c-red">man: ' + esc(cmd) + ' için kayıt yok</span>');
+        return;
+      }
+      line('<span class="c-green c-bold">' + esc(cmd.toUpperCase()) + '(1)</span>');
+      blank();
+      line('<span class="c-yellow">İSİM</span>');
+      line('  ' + esc(cmd) + ' — ' + esc(c.desc));
+      blank();
+      line('<span class="c-yellow">AÇIKLAMA</span>');
+      line('  ' + esc(cmd) + ' komutu ' + esc(c.desc) + ' işlemini gerçekleştirir.');
+      line('  Bu, khontkar@arch terminalinin bir parçasıdır.');
+    }
+  };
+
+  CMDS.which = {
+    desc: 'komut yolu',
+    run(args){
+      if (!args.length){ line('<span class="c-red">which: eksik operand</span>'); return; }
+      const c = args[0];
+      if (CMDS[c]) line('/usr/bin/' + c);
+      else line('<span class="c-red">which: ' + esc(c) + ' bulunamadı</span>');
+    }
+  };
+
+  CMDS.grep = {
+    desc: 'metin ara',
+    run(args){
+      if (args.length < 2){
+        line('<span class="c-red">grep: kullanım: grep <desen> <dosya></span>');
+        return;
+      }
+      const pattern = args[0].replace(/^["']|["']$/g,'');
+      const filePath = FS.normalize(args[1], state.cwd);
+      const content = FS.read(filePath);
+      if (content === null){
+        line('<span class="c-red">grep: ' + esc(args[1]) + ': yok</span>');
+        return;
+      }
+      let re;
+      try { re = new RegExp(pattern, 'i'); } catch(e){ re = new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'); }
+      const hits = content.split('\n').filter(l => re.test(l));
+      if (!hits.length){ return; }
+      hits.forEach(h => {
+        const highlighted = esc(h).replace(
+          new RegExp('(' + pattern.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')','gi'),
+          '<span class="c-green c-bold">$1</span>'
+        );
+        line(highlighted);
+      });
+    }
+  };
+
+  CMDS.wc = {
+    desc: 'satır/kelime sayısı',
+    run(args){
+      if (!args.length){ line('<span class="c-red">wc: eksik operand</span>'); return; }
+      const path = FS.normalize(args[0], state.cwd);
+      const content = FS.read(path);
+      if (content === null){ line('<span class="c-red">wc: ' + esc(args[0]) + ': yok</span>'); return; }
+      const lines = content.split('\n').length;
+      const words = content.split(/\s+/).filter(Boolean).length;
+      const chars = content.length;
+      line('  ' + lines + '  ' + words + '  ' + chars + '  ' + esc(args[0]));
+    }
+  };
+
+  CMDS.head = {
+    desc: 'ilk satırlar',
+    run(args){
+      const n = args[0] && /^\d+$/.test(args[0]) ? parseInt(args.shift(),10) : 10;
+      if (!args.length){ line('<span class="c-red">head: eksik operand</span>'); return; }
+      const content = FS.read(FS.normalize(args[0], state.cwd));
+      if (content === null){ line('<span class="c-red">head: ' + esc(args[0]) + ': yok</span>'); return; }
+      content.split('\n').slice(0,n).forEach(l => text(l));
+    }
+  };
+
+  CMDS.tail = {
+    desc: 'son satırlar',
+    run(args){
+      const n = args[0] && /^\d+$/.test(args[0]) ? parseInt(args.shift(),10) : 10;
+      if (!args.length){ line('<span class="c-red">tail: eksik operand</span>'); return; }
+      const content = FS.read(FS.normalize(args[0], state.cwd));
+      if (content === null){ line('<span class="c-red">tail: ' + esc(args[0]) + ': yok</span>'); return; }
+      const lines = content.split('\n');
+      lines.slice(Math.max(0, lines.length - n)).forEach(l => text(l));
+    }
+  };
+
+  CMDS.banner = {
+    desc: 'ASCII banner',
+    run(){
+      BANNER.split('\n').forEach(l => line('<span class="c-green">' + esc(l) + '</span>'));
+      blank();
+      line('<span class="c-dim">khontkar@arch — security [dep0]</span>');
+    }
+  };
+
+  CMDS.fortune = {
+    desc: 'rastgele söz',
+    run(){
+      const quotes = [
+        '"Güvenlik bir ürün değil, bir süreçtir." — Bruce Schneier',
+        '"Sistemine güvenme. Test et." — khontkar',
+        '"En zayıf halka her zaman insandır."',
+        '"Yetki olmadan sızma testi, suçtur."',
+        '"Bilgi güçtür. Ama loglar daha güçlüdür."',
+        '"Bir kere root oldun mu, geri dönüş yok."',
+        '"Amateurs hack systems, professionals hack people." — Bruce Schneier',
+        '"Sessizlik, en iyi exploit\'tir."'
+      ];
+      const q = quotes[randInt(0, quotes.length-1)];
+      line('<span class="c-yellow">' + esc(q) + '</span>');
+    }
+  };
+
+  CMDS.cowsay = {
+    desc: 'inek konuşsun',
+    run(args){
+      const msg = args.join(' ') || 'Moo.';
+      const maxLen = Math.max(msg.length, 4);
+      const top = ' ' + '_'.repeat(maxLen + 2);
+      const bot = ' ' + '-'.repeat(maxLen + 2);
+      line('<span class="c-green">' + top + '</span>');
+      line('<span class="c-green">' + '< ' + esc(msg.padEnd(maxLen)) + ' >' + '</span>');
+      line('<span class="c-green">' + bot + '</span>');
+      line('<span class="c-green">        \\   ^__^</span>');
+      line('<span class="c-green">         \\  (oo)\\_______</span>');
+      line('<span class="c-green">            (__)\\       )\\/\\</span>');
+      line('<span class="c-green">                ||----w |</span>');
+      line('<span class="c-green">                ||     ||</span>');
+    }
+  };
+
+  CMDS.figlet = {
+    desc: 'ASCII yazı',
+    run(args){
+      const txt = (args.join(' ') || 'KH0NTK4R').toUpperCase();
+      // Basit 5x5 font (sadece harf ve rakam)
+      const FONT = {
+        'A':[' ██ ','█  █','████','█  █','█  █'],
+        'B':['███ ','█  █','███ ','█  █','███ '],
+        'C':[' ███','█   ','█   ','█   ',' ███'],
+        'D':['███ ','█  █','█  █','█  █','███ '],
+        'E':['████','█   ','███ ','█   ','████'],
+        'F':['████','█   ','███ ','█   ','█   '],
+        'G':[' ███','█   ','█ ██','█  █',' ███'],
+        'H':['█  █','█  █','████','█  █','█  █'],
+        'I':['███',' █ ',' █ ',' █ ','███'],
+        'J':['  ██','   █','   █','█  █',' ██ '],
+        'K':['█  █','█ █ ','██  ','█ █ ','█  █'],
+        'L':['█   ','█   ','█   ','█   ','████'],
+        'M':['█   █','██ ██','█ █ █','█   █','█   █'],
+        'N':['█   █','██  █','█ █ █','█  ██','█   █'],
+        'O':[' ██ ','█  █','█  █','█  █',' ██ '],
+        'P':['███ ','█  █','███ ','█   ','█   '],
+        'Q':[' ██ ','█  █','█  █','█ █ ',' ██ '],
+        'R':['███ ','█  █','███ ','█ █ ','█  █'],
+        'S':[' ███','█   ',' ██ ','   █','███ '],
+        'T':['████',' █  ',' █  ',' █  ',' █  '],
+        'U':['█  █','█  █','█  █','█  █',' ██ '],
+        'V':['█  █','█  █','█  █',' ██ ',' ██ '],
+        'W':['█   █','█   █','█ █ █','██ ██','█   █'],
+        'X':['█  █',' ██ ',' ██ ',' ██ ','█  █'],
+        'Y':['█  █',' ██ ',' █  ',' █  ',' █  '],
+        'Z':['████','  █ ',' █  ','█   ','████'],
+        '0':[' ██ ','█  █','█  █','█  █',' ██ '],
+        '1':[' █  ','██  ',' █  ',' █  ','███ '],
+        '2':[' ██ ','█  █','  █ ',' █  ','████'],
+        '3':['███ ','  █ ',' ██ ','  █ ','███ '],
+        '4':['█  █','█  █','████','   █','   █'],
+        '5':['████','█   ','███ ','   █','███ '],
+        '6':[' ███','█   ','███ ','█  █','███ '],
+        '7':['████','   █','  █ ',' █  ','█   '],
+        '8':[' ██ ','█  █',' ██ ','█  █',' ██ '],
+        '9':[' ███','█  █',' ███','   █','███ '],
+        ' ':['  ','  ','  ','  ','  '],
+        '!':[' █ ',' █ ',' █ ','   ',' █ '],
+        '?':[' ██ ','   █',' █  ','    ',' █  '],
+        '.':['  ','  ','  ','  ',' █'],
+        '-':['   ','   ','███','   ','   '],
+        '_':['   ','   ','   ','   ','███'],
+      };
+      for (let row=0; row<5; row++){
+        let lineStr = '';
+        for (const ch of txt){
+          const glyph = FONT[ch];
+          lineStr += glyph ? glyph[row] : '   ';
+          lineStr += ' ';
+        }
+        line('<span class="c-green">' + esc(lineStr) + '</span>');
+      }
+    }
+  };
+
+  CMDS.sl = {
+    desc: 'buharlı lokomotif',
+    async run(){
+      const frames = [
+        '    ====        ________                ___________ ',
+        ' _D _|  |_______/        \\__I_I_____===__|_________| ',
+        '  |(_)---  |   H\\________/ |   |        =|___ ___|   ',
+        '  /     |  |   H  |  |     |   |         ||_| |_||   ',
+        ' |      |  |   H  |__--------------------| [___] |   ',
+        ' | ________|___H__/__|_____/[][]~\\_______|       |   ',
+        ' |/ |   |-----------I_____I [][] []  D   |=======|__ ',
+        '__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ ',
+        ' |/-=|___|=    ||    ||    ||    |_____/~\\___/        ',
+        '  \\_/      \\O=====O=====O=====O_/      \\_/            '
+      ];
+      for (let i=0; i<3; i++){
+        const pad = ' '.repeat(i*6);
+        for (const f of frames){
+          line('<span class="c-yellow">' + esc(pad + f) + '</span>');
+        }
+        blank();
+        await sleep(300);
+      }
+      line('<span class="c-dim">(vagonu kaçırdın)</span>');
+    }
+  };
+
+  CMDS.sudo = {
+    desc: 'yetkili komut',
+    async run(args){
+      line('<span class="c-dim">[sudo] password for ' + esc(state.user) + ':</span>');
+      await sleep(700);
+      line('Sorry, user ' + esc(state.user) + ' is not in the sudoers file.  This incident has been reported.');
+      Sfx.err();
+    }
+  };
+
+  CMDS.rm = {
+    desc: 'sil',
+    async run(args){
+      if (args.join(' ').includes('-rf /') || args.join(' ').includes('-rf /*')){
+        line('<span class="c-red c-bold">rm: refusing to remove \'/\' recursively</span>');
+        await sleep(300);
+        line('<span class="c-yellow">iyi deneme. 😏</span>');
+        return;
+      }
+      if (!args.length){
+        line('<span class="c-red">rm: eksik operand</span>');
+        return;
+      }
+      line('<span class="c-dim">rm: ' + esc(args[args.length-1]) + ': salt okunur dosya sistemi</span>');
+    }
+  };
+
+  CMDS.theme = {
+    desc: 'tema değiştir',
+    run(args){
+      if (!args.length){
+        line('Kullanılabilir temalar: <span class="c-green">' + THEMES.join(', ') + '</span>');
+        line('Mevcut: <span class="c-green">' + document.body.dataset.theme + '</span>');
+        return;
+      }
+      if (setTheme(args[0].toLowerCase())){
+        line('<span class="c-green">tema değiştirildi → ' + esc(args[0].toLowerCase()) + '</span>');
+      } else {
+        line('<span class="c-red">bilinmeyen tema: ' + esc(args[0]) + '</span>');
+      }
+    }
+  };
+
+  CMDS.matrix = {
+    desc: 'matrix yağmuru',
+    run(){
+      const on = Matrix.toggle();
+      line((on ? '<span class="c-green">matrix: ON</span>' : '<span class="c-yellow">matrix: OFF</span>'));
+    }
+  };
+
+  CMDS.sound = {
+    desc: 'ses aç/kapat',
+    run(){
+      const on = Sfx.toggle();
+      line((on ? '<span class="c-green">sound: ON</span>' : '<span class="c-yellow">sound: OFF</span>'));
+    }
+  };
+
+  CMDS.projects = {
+    desc: 'projeler',
+    run(){
+      line('<span class="c-green c-bold">ÖNE ÇIKAN PROJELER</span>');
+      blank();
+      const projects = [
+        ['khontkar.github.io', 'Kişisel portfolyo & araştırma notları', 'Web'],
+        ['recon-suite',        'Subdomain + port tarama araç seti',     'Python'],
+        ['log-analyzer',       'Anomali & saldırı imzası tespiti',       'Go'],
+        ['payload-lab',        'CTF & lab payload koleksiyonu',          'Security'],
+        ['web-shell',          'Yetkili testler için modüler arayüz',    'PHP']
+      ];
+      projects.forEach(([n,d,t])=>{
+        line('  <span class="c-green c-bold">▸ ' + esc(n) + '</span>');
+        line('     <span class="c-dim">' + esc(d) + '</span>  <span class="c-yellow">[' + esc(t) + ']</span>');
+      });
+      blank();
+      line('<span class="c-dim">Detay için: </span><span class="c-green">https://github.com/khontkar</span>');
+    }
+  };
+
+  CMDS.skills = {
+    desc: 'yetenekler',
+    run(){
+      line('<span class="c-green c-bold">YETENEK MATRİSİ</span>');
+      blank();
+      const skills = [
+        ['Web Application Pentest', 94],
+        ['Network Security',        88],
+        ['OSINT & Recon',           91],
+        ['Bug Bounty',              89],
+        ['Malware Analysis',        76],
+        ['Reverse Engineering',     72],
+        ['Linux / Hardening',       90],
+        ['Automation & Tooling',    85]
+      ];
+      skills.forEach(([n,v])=>{
+        const filled = Math.round(v/5);
+        const bar = '█'.repeat(filled) + '░'.repeat(20-filled);
+        line('  ' + esc(n.padEnd(26,' ')) + '<span class="c-green">' + bar + '</span>  <span class="c-yellow">' + v + '%</span>');
+      });
+    }
+  };
+
+  CMDS.contact = {
+    desc: 'iletişim',
+    run(){
+      line('<span class="c-green c-bold">İLETİŞİM</span>');
+      blank();
+      line('  <span class="c-yellow">GitHub</span>  : https://github.com/khontkar');
+      line('  <span class="c-yellow">Web</span>     : https://khontkar.github.io');
+      line('  <span class="c-yellow">Durum</span>   : yalnızca yetkili test talepleri kabul edilir.');
+    }
+  };
+
+  CMDS.reboot = {
+    desc: 'yeniden başlat',
+    async run(){
+      line('<span class="c-yellow">Sistem yeniden başlatılıyor...</span>');
+      await sleep(900);
+      location.reload();
+    }
+  };
+
+  CMDS.exit = {
+    desc: 'çıkış',
+    async run(){
+      line('<span class="c-dim">logout</span>');
+      await sleep(500);
+      line('<span class="c-yellow">Connection to khontkar-arch closed.</span>');
+      await sleep(500);
+      input.disabled = true;
+      input.placeholder = '';
+      line('<span class="c-dim">(yenilemek için sayfayı yeniden yükle)</span>');
+    }
+  };
+
+  /* ---------- AUTOCOMPLETE ---------- */
+  const CMD_NAMES = Object.keys(CMDS).sort();
+
+  function complete(partial, cwd){
+    // Eğer boşluk yoksa → komut tamamla
+    if (!partial.includes(' ')){
+      const matches = CMD_NAMES.filter(c => c.startsWith(partial));
+      if (matches.length === 1) return matches[0] + ' ';
+      if (matches.length > 1){
+        line('<span class="c-dim">' + matches.join('   ') + '</span>');
+      }
+      return null;
+    }
+
+    // Argüman → dosya tamamla
+    const lastSpace = partial.lastIndexOf(' ');
+    const before = partial.slice(0, lastSpace + 1);
+    const frag = partial.slice(lastSpace + 1);
+    const dir = frag.includes('/') ? frag.slice(0, frag.lastIndexOf('/')) : '';
+    const base = frag.includes('/') ? frag.slice(frag.lastIndexOf('/')+1) : frag;
+
+    const searchPath = FS.normalize(dir || '.', cwd);
+    const items = FS.list(searchPath);
+    if (!items) return null;
+
+    const matches = items.filter(it => it.name.startsWith(base));
+    if (matches.length === 1){
+      const m = matches[0];
+      const trail = m.type === 'dir' ? '/' : ' ';
+      return before + (dir ? dir + '/' : '') + m.name + trail;
+    }
+    if (matches.length > 1){
+      line('<span class="c-dim">' + matches.map(m => m.name + (m.type==='dir'?'/':'')).join('   ') + '</span>');
+    }
+    return null;
+  }
+
+  /* ---------- KOMUT ÇALIŞTIR ---------- */
+  async function exec(raw){
+    const cmdLine = raw.trim();
+    if (!cmdLine) return;
+
+    // Echo prompt satırı
+    line('<span class="prompt">' + buildPrompt() + '</span><span class="c-fg">' + esc(cmdLine) + '</span>');
+
+    state.history.push(cmdLine);
+    if (state.history.length > 200) state.history.shift();
+    state.histIdx = state.history.length;
+
+    const parts = cmdLine.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+    const cmd = parts[0];
+    const args = parts.slice(1).map(a => a.replace(/^["']|["']$/g,''));
+
+    stCmd.textContent = cmd;
+
+    if (CMDS[cmd]){
+      state.busy = true;
+      try {
+        await CMDS[cmd].run(args);
+      } catch(e){
+        line('<span class="c-red">hata: ' + esc(e.message) + '</span>');
+      }
+      state.busy = false;
+    } else {
+      line('<span class="c-red">zsh: command not found: ' + esc(cmd) + '</span>');
+      Sfx.err();
+    }
+    stCmd.textContent = 'ready';
+  }
+
+  /* ---------- INPUT EVENTLERİ ---------- */
+  function bind(){
+    input.addEventListener('keydown', async e => {
+      // Enter
+      if (e.key === 'Enter'){
+        e.preventDefault();
+        Sfx.enter();
+        const v = input.value;
+        input.value = '';
+        refreshPrompt();
+        await exec(v);
+        return;
+      }
+
+      // Tab
+      if (e.key === 'Tab'){
+        e.preventDefault();
+        const completed = complete(input.value, state.cwd);
+        if (completed !== null){
+          input.value = completed;
+        }
+        refreshPrompt();
+        return;
+      }
+
+      // Up
+      if (e.key === 'ArrowUp'){
+        e.preventDefault();
+        if (!state.history.length) return;
+        state.histIdx = Math.max(0, state.histIdx - 1);
+        input.value = state.history[state.histIdx] || '';
+        refreshPrompt();
+        // imleci sona al
+        requestAnimationFrame(()=>{
+          input.setSelectionRange(input.value.length, input.value.length);
+        });
+        return;
+      }
+
+      // Down
+      if (e.key === 'ArrowDown'){
+        e.preventDefault();
+        if (!state.history.length) return;
+        state.histIdx = Math.min(state.history.length, state.histIdx + 1);
+        input.value = state.history[state.histIdx] || '';
+        refreshPrompt();
+        return;
+      }
+
+      // Ctrl+L
+      if (e.key === 'l' && e.ctrlKey){
+        e.preventDefault();
+        clear();
+        return;
+      }
+
+      // Ctrl+C
+      if (e.key === 'c' && e.ctrlKey){
+        e.preventDefault();
+        line('<span class="prompt">' + buildPrompt() + '</span><span class="c-fg">' + esc(input.value) + '</span><span class="c-red">^C</span>');
+        input.value = '';
+        refreshPrompt();
+        return;
+      }
+
+      // Ctrl+U
+      if (e.key === 'u' && e.ctrlKey){
+        e.preventDefault();
+        input.value = '';
+        refreshPrompt();
+        return;
+      }
+
+      // Diğer tuşlar → sfx
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey){
+        Sfx.key();
+      }
+    });
+
+    // Input değişince cursor bloğunu güncelle
+    input.addEventListener('input', ()=>{
+      cursorBlock.style.display = input.value.length ? 'none' : 'inline-block';
+    });
+
+    // Terminale tıklayınca focus
+    term.addEventListener('click', e => {
+      if (window.getSelection().toString()) return;
+      if (e.target.tagName !== 'INPUT') input.focus();
+    });
+  }
+
+  /* ---------- BAŞLAT ---------- */
+  async function start(user){
+    state.user = user || 'khontkar';
+    state.startTime = Date.now();
+    refreshPrompt();
+
+    clear();
+    // Banner
+    BANNER.split('\n').forEach(l => line('<span class="c-green">' + esc(l) + '</span>'));
+    blank();
+    line('<span class="c-dim">khontkar@arch — security [dep0]</span>');
+    line('<span class="c-dim">Son giriş: ' + new Date().toLocaleString('tr-TR') + '</span>');
+    blank();
+    line('<span class="c-yellow">Hoş geldin, ' + esc(state.user) + '.</span>');
+    line('<span class="c-dim">Komutlar için </span><span class="c-green">help</span><span class="c-dim"> yaz. İpucu: </span><span class="c-green">neofetch</span>');
+    blank();
+
+    bind();
+
+    // Autofocus
+    setTimeout(()=>{
+      if (window.matchMedia('(hover: hover)').matches) input.focus();
+    }, 400);
+  }
+
+  return { start, exec, print: text, clear, state };
+})();
+
+/* ============================================================
+   MASAÜSTÜ (topbar / statusbar)
+   ============================================================ */
+const Desktop = (function(){
+  const clock = $('#clock');
+  const upTime = $('#upTime');
+  const cpuBar = $('#cpuBar');
+  const memBar = $('#memBar');
+
+  let start = Date.now();
+
+  function tick(){
+    const d = new Date();
+    clock.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+
+    const s = Math.floor((Date.now() - start)/1000);
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+    upTime.textContent = pad(h) + ':' + pad(m);
+
+    // CPU/mem bar güncelle
+    if (Math.random() > 0.7){
+      cpuBar.style.width = randInt(12, 72) + '%';
+      memBar.style.width = randInt(28, 58) + '%';
+    }
+  }
+
+  function start2(user){
+    start = Date.now();
+    tick();
+    setInterval(tick, 1000);
+
+    // Pencere butonları
+    $('#btnTheme').addEventListener('click', ()=>{ cycleTheme(); Sfx.beep(); });
+    $('#btnMatrix').addEventListener('click', ()=>{ 
+      const on = Matrix.toggle();
+      toast('matrix ' + (on ? 'on' : 'off'));
+    });
+    $('#btnSound').addEventListener('click', ()=>{
+      const on = Sfx.toggle();
+      toast('sound ' + (on ? 'on' : 'off'));
+    });
+
+    // Boot terminal
+    $('#desktop').classList.add('show');
+    Term.start(user);
+  }
+
+  return { start: start2 };
+})();
+
+/* ============================================================
+   GLOBAL KISAYOLLAR
+   ============================================================ */
+window.addEventListener('keydown', e => {
+  // F1 → help
+  if (e.key === 'F1'){
+    e.preventDefault();
+    Term.exec('help');
+  }
+  // Escape → matrix toggle (sadece login sonrası)
+  if (e.key === 'Escape' && $('#desktop').classList.contains('show')){
+    Matrix.toggle();
+    toast('matrix ' + (Matrix.isRunning?.() ? 'on' : 'off'));
+  }
+});
+
+/* ============================================================
+   BAŞLAT
+   ============================================================ */
+window.addEventListener('load', ()=>{
+  Boot.run();
+});
+
+// Resize → matrix canvas
+let resizeTimer;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ Matrix.redraw(); }, 200);
+});
+
+})();
+</script>
+</body>
+</html>
