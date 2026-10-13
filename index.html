@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KH0NTK4R // SECURITY [DEP0]</title>
+<meta name="description" content="KH0NTK4R Security [DEP0] — Web & Hacking, Defacer, Pentester. GitHub Repository.">
+<meta name="keywords" content="KH0NTK4R, Security, GitHub, Repo, Pentester, Pentest, Red Team">
+<meta name="author" content="KHONTKAR">
+<meta name="theme-color" content="#050506">
+<meta property="og:title" content="KH0NTK4R // SECURITY [DEP0]">
+<meta property="og:description" content="Web & Hacking · Defacer · Pentester">
+<meta property="og:image" content="https://avatars1.githubusercontent.com/u/56101811?s=460&v=4">
+<link rel="icon" href="https://avatars1.githubusercontent.com/u/56101811?s=460&v=4" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   00. TOKENS
+   ============================================================ */
+:root{
+  --accent:      #ff0033;
+  --accent-rgb:  255, 0, 51;
+  --bg:          #050506;
+  --bg-soft:     #0b0b0e;
+  --fg:          #e9e9ee;
+  --dim:         #6d6d78;
+  --line:        rgba(255,255,255,.08);
+  --glass:       rgba(12,12,16,.62);
+  --font-mono:   'JetBrains Mono', 'Courier New', monospace;
+  --font-dis:    'Orbitron', sans-serif;
+  --ease:        cubic-bezier(.19,1,.22,1);
+  --maxw:        1180px;
+}
+
+/* ============================================================
+   01. RESET
+   ============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--font-mono);
+  font-size:15px;
+  line-height:1.65;
+  overflow-x:hidden;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit;background:none;border:none;outline:none}
+::selection{background:var(--accent);color:#000}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:#08080a}
+::-webkit-scrollbar-thumb{background:rgba(var(--accent-rgb),.45);border-radius:9px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ============================================================
+   02. AMBIENT BACKGROUND LAYERS
+   ============================================================ */
+#matrixCanvas,
+#netCanvas{
+  position:fixed;
+  inset:0;
+  z-index:-3;
+  pointer-events:none;
+}
+#netCanvas{z-index:-2}
+
+.bg-glow{
+  position:fixed;
+  inset:0;
+  z-index:-4;
+  background:
+    radial-gradient(760px circle at 18% 12%, rgba(var(--accent-rgb),.16), transparent 60%),
+    radial-gradient(900px circle at 84% 82%, rgba(var(--accent-rgb),.12), transparent 62%),
+    radial-gradient(600px circle at 55% 45%, rgba(var(--accent-rgb),.06), transparent 65%);
+  animation:glowPulse 7s ease-in-out infinite;
+}
+@keyframes glowPulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+.grid-floor{
+  position:fixed;
+  inset:0;
+  z-index:-4;
+  background-image:
+    linear-gradient(rgba(var(--accent-rgb),.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb),.05) 1px, transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 90% 65% at 50% 40%, #000 25%, transparent 78%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 65% at 50% 40%, #000 25%, transparent 78%);
+  animation:gridDrift 24s linear infinite;
+}
+@keyframes gridDrift{to{background-position:52px 52px}}
+
+/* CRT overlays */
+.fx-scanlines{
+  position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 2px,
+    rgba(0,0,0,.22) 3px,
+    rgba(0,0,0,.22) 4px);
+  mix-blend-mode:multiply;
+  opacity:.5;
+}
+.fx-vignette{
+  position:fixed;inset:0;z-index:9997;pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.72) 100%);
+}
+.fx-noise{
+  position:fixed;inset:-150%;z-index:9996;pointer-events:none;
+  opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:noiseShift .6s steps(4) infinite;
+}
+@keyframes noiseShift{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(-3%,2%)}
+  50%{transform:translate(2%,-3%)}
+  75%{transform:translate(-2%,-2%)}
+  100%{transform:translate(3%,3%)}
+}
+.fx-scanbar{
+  position:fixed;left:0;top:0;width:100%;height:130px;z-index:9995;pointer-events:none;
+  background:linear-gradient(to bottom, transparent, rgba(var(--accent-rgb),.055), transparent);
+  animation:scanSweep 9s linear infinite;
+}
+@keyframes scanSweep{
+  0%{transform:translateY(-140px)}
+  100%{transform:translateY(100vh)}
+}
+
+/* ============================================================
+   03. CUSTOM CURSOR
+   ============================================================ */
+.cursor-dot,.cursor-ring{
+  position:fixed;top:0;left:0;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:10000;
+  will-change:transform;
+  opacity:0;
+  transition:opacity .3s;
+}
+.cursor-dot{
+  width:6px;height:6px;
+  background:var(--accent);
+  box-shadow:0 0 12px var(--accent);
+  margin:-3px 0 0 -3px;
+}
+.cursor-ring{
+  width:34px;height:34px;
+  border:1px solid rgba(var(--accent-rgb),.65);
+  margin:-17px 0 0 -17px;
+  transition:opacity .3s, width .25s var(--ease), height .25s var(--ease), margin .25s var(--ease), background .25s;
+}
+html.has-cursor .cursor-dot,
+html.has-cursor .cursor-ring{opacity:1}
+html.has-cursor,
+html.has-cursor *{cursor:none !important}
+body.cursor-hot .cursor-ring{
+  width:56px;height:56px;margin:-28px 0 0 -28px;
+  background:rgba(var(--accent-rgb),.10);
+  border-color:var(--accent);
+}
+
+/* ============================================================
+   04. BOOT SCREEN
+   ============================================================ */
+.boot{
+  position:fixed;inset:0;z-index:10001;
+  background:#030304;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  transition:opacity .6s var(--ease), visibility .6s;
+}
+.boot.done{opacity:0;visibility:hidden}
+.boot-inner{width:min(640px,100%)}
+.boot-log{
+  font-family:var(--font-mono);
+  font-size:13px;
+  color:#00ff9c;
+  white-space:pre-wrap;
+  word-break:break-word;
+  min-height:190px;
+  line-height:1.8;
+  text-shadow:0 0 8px rgba(0,255,156,.45);
+}
+.boot-log .warn{color:#ffcc00;text-shadow:0 0 8px rgba(255,204,0,.45)}
+.boot-bar{
+  margin-top:22px;height:4px;width:100%;
+  background:rgba(255,255,255,.08);
+  border-radius:99px;overflow:hidden;
+}
+.boot-bar i{
+  display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--accent),#00ff9c);
+  box-shadow:0 0 14px var(--accent);
+}
+.boot-hint{
+  margin-top:16px;font-size:11px;letter-spacing:.16em;
+  color:var(--dim);text-transform:uppercase;
+}
+
+/* ============================================================
+   05. HUD HEADER
+   ============================================================ */
+.progress{
+  position:fixed;top:0;left:0;height:2px;width:0%;
+  background:linear-gradient(90deg,var(--accent),#fff);
+  box-shadow:0 0 12px var(--accent);
+  z-index:9999;
+  transition:width .12s linear;
+}
+.hud{
+  position:fixed;top:0;left:0;right:0;z-index:900;
+  display:flex;align-items:center;gap:18px;
+  padding:12px clamp(14px,3vw,34px);
+  background:linear-gradient(to bottom, rgba(5,5,6,.92), rgba(5,5,6,.35) 70%, transparent);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  font-size:11.5px;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  border-bottom:1px solid transparent;
+}
+.hud.scrolled{border-bottom-color:var(--line);background:rgba(5,5,6,.88)}
+.hud-brand{
+  font-family:var(--font-dis);
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:.18em;
+  color:var(--accent);
+  text-shadow:0 0 14px rgba(var(--accent-rgb),.6);
+  white-space:nowrap;
+}
+.hud-brand span{color:var(--fg);opacity:.5}
+.hud-status{
+  display:flex;align-items:center;gap:8px;
+  color:#00ff9c;
+  white-space:nowrap;
+}
+.hud-status .led{
+  width:7px;height:7px;border-radius:50%;
+  background:#00ff9c;
+  box-shadow:0 0 10px #00ff9c;
+  animation:led 1.6s ease-in-out infinite;
+}
+@keyframes led{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+.hud-spacer{flex:1}
+.hud-metric{display:flex;align-items:center;gap:8px;color:var(--dim)}
+.hud-meter{
+  width:66px;height:5px;border-radius:99px;
+  background:rgba(255,255,255,.09);overflow:hidden;
+}
+.hud-meter i{
+  display:block;height:100%;width:20%;
+  background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+  transition:width .9s var(--ease);
+}
+.hud-clock{color:var(--fg);opacity:.75;font-variant-numeric:tabular-nums;white-space:nowrap}
+.themes{display:flex;gap:7px}
+.themes button{
+  width:14px;height:14px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.25);
+  transition:transform .2s var(--ease), box-shadow .2s;
+}
+.themes button:hover{transform:scale(1.28)}
+.themes button[data-accent="red"]{background:#ff0033;box-shadow:0 0 9px #ff0033}
+.themes button[data-accent="green"]{background:#00ff88;box-shadow:0 0 9px #00ff88}
+.themes button[data-accent="cyan"]{background:#00e5ff;box-shadow:0 0 9px #00e5ff}
+.themes button[data-accent="purple"]{background:#b14cff;box-shadow:0 0 9px #b14cff}
+.themes button[data-accent="amber"]{background:#ffb000;box-shadow:0 0 9px #ffb000}
+
+/* ============================================================
+   06. LAYOUT
+   ============================================================ */
+main{position:relative;z-index:2}
+.wrap{
+  width:min(var(--maxw),100%);
+  margin:0 auto;
+  padding:0 clamp(16px,4vw,34px);
+}
+section{padding:clamp(70px,10vw,130px) 0;position:relative}
+
+.sec-head{margin-bottom:44px}
+.sec-tag{
+  font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--accent);opacity:.85;
+  display:flex;align-items:center;gap:12px;
+}
+.sec-tag::before{
+  content:'';width:34px;height:1px;background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+}
+.sec-title{
+  font-family:var(--font-dis);
+  font-weight:900;
+  font-size:clamp(1.5rem,3.6vw,2.5rem);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-top:12px;
+}
+.sec-title em{color:var(--accent);font-style:normal;text-shadow:0 0 22px rgba(var(--accent-rgb),.55)}
+.sec-sub{color:var(--dim);font-size:13.5px;margin-top:10px;max-width:640px}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .85s var(--ease), transform .85s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* ============================================================
+   07. HERO
+   ============================================================ */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding-top:120px;
+  position:relative;
+}
+.avatar-wrap{position:relative;width:clamp(150px,22vw,220px);aspect-ratio:1;margin-bottom:34px}
+.avatar{
+  width:100%;height:100%;border-radius:50%;
+  object-fit:cover;
+  border:2px solid rgba(var(--accent-rgb),.85);
+  box-shadow:
+    0 0 0 6px rgba(var(--accent-rgb),.07),
+    0 0 34px rgba(var(--accent-rgb),.55),
+    inset 0 0 30px rgba(0,0,0,.8);
+  position:relative;z-index:2;
+  transition:filter .5s var(--ease), transform .5s var(--ease);
+}
+.avatar-wrap:hover .avatar{filter:hue-rotate(160deg) saturate(1.4);transform:scale(1.05)}
+.avatar-ring{
+  position:absolute;inset:-16px;
+  border-radius:50%;
+  border:1px dashed rgba(var(--accent-rgb),.4);
+  animation:spin 14s linear infinite;
+}
+.avatar-ring::after{
+  content:'';position:absolute;top:-4px;left:50%;
+  width:8px;height:8px;margin-left:-4px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 16px var(--accent);
+}
+.avatar-ring.two{
+  inset:-30px;
+  border-style:solid;
+  border-color:rgba(var(--accent-rgb),.16);
+  animation-duration:22s;
+  animation-direction:reverse;
+}
+.avatar-ring.two::after{background:#00e5ff;box-shadow:0 0 16px #00e5ff}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Glitch title */
+.glitch{
+  position:relative;
+  font-family:var(--font-dis);
+  font-weight:900;
+  font-size:clamp(2.1rem,7.4vw,5rem);
+  letter-spacing:.07em;
+  line-height:1;
+  color:var(--fg);
+  text-shadow:0 0 26px rgba(var(--accent-rgb),.5);
+  user-select:none;
+}
+.glitch::before,
+.glitch::after{
+  content:attr(data-text);
+  position:absolute;left:0;top:0;
+  width:100%;height:100%;
+  overflow:hidden;
+  pointer-events:none;
+}
+.glitch::before{
+  color:#00e5ff;
+  text-shadow:-2px 0 #00e5ff;
+  clip-path:polygon(0 0,100% 0,100% 46%,0 46%);
+  animation:glitchA 3.4s infinite linear alternate-reverse;
+}
+.glitch::after{
+  color:#ff2fb0;
+  text-shadow:2px 0 #ff2fb0;
+  clip-path:polygon(0 54%,100% 54%,100% 100%,0 100%);
+  animation:glitchB 2.6s infinite linear alternate-reverse;
+}
+@keyframes glitchA{
+  0%,88%,100%{transform:translate(0);opacity:0}
+  89%{transform:translate(-3px,-2px);opacity:.9}
+  91%{transform:translate(3px,1px);opacity:.9}
+  93%{transform:translate(-2px,2px);opacity:.9}
+  95%{transform:translate(2px,-1px);opacity:.9}
+}
+@keyframes glitchB{
+  0%,84%,100%{transform:translate(0);opacity:0}
+  85%{transform:translate(3px,2px);opacity:.9}
+  88%{transform:translate(-3px,-1px);opacity:.9}
+  91%{transform:translate(2px,-2px);opacity:.9}
+  94%{transform:translate(-2px,1px);opacity:.9}
+}
+
+.hero-tag{
+  margin-top:18px;
+  font-size:clamp(12px,1.5vw,14px);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--dim);
+  min-height:1.6em;
+}
+.hero-tag .ps1{color:var(--accent);margin-right:8px}
+.caret{
+  display:inline-block;width:9px;height:1.05em;
+  background:var(--accent);
+  vertical-align:-3px;margin-left:2px;
+  box-shadow:0 0 10px var(--accent);
+  animation:blink 1s steps(2,start) infinite;
+}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+.hero-desc{
+  max-width:640px;
+  margin:26px auto 0;
+  color:#a9a9b4;
+  font-size:14px;
+  line-height:1.85;
+}
+.hero-desc b{color:var(--accent);font-weight:700}
+
+.cta{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:38px}
+.btn{
+  position:relative;
+  display:inline-flex;align-items:center;gap:10px;
+  padding:13px 26px;
+  font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  border:1px solid rgba(var(--accent-rgb),.55);
+  background:rgba(var(--accent-rgb),.07);
+  color:var(--fg);
+  overflow:hidden;
+  transition:color .35s var(--ease), border-color .35s, box-shadow .35s, transform .3s var(--ease);
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:var(--accent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .45s var(--ease);
+  z-index:-1;
+}
+.btn:hover{
+  color:#000;border-color:var(--accent);
+  box-shadow:0 0 30px rgba(var(--accent-rgb),.55);
+  transform:translateY(-3px);
+}
+.btn:hover::before{transform:scaleX(1)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--dim)}
+.btn.ghost:hover{color:#000;border-color:var(--fg)}
+.btn.ghost::before{background:var(--fg)}
+
+.scroll-cue{
+  position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  font-size:10px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;
+}
+.scroll-cue i{
+  width:1px;height:44px;background:linear-gradient(var(--accent),transparent);
+  animation:cue 2s ease-in-out infinite;
+}
+@keyframes cue{0%,100%{opacity:.25;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
+
+/* ============================================================
+   08. STATS
+   ============================================================ */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+}
+.stat{
+  background:var(--bg-soft);
+  padding:30px 22px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  transition:background .4s;
+}
+.stat::after{
+  content:'';position:absolute;left:0;bottom:0;height:2px;width:100%;
+  background:var(--accent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .5s var(--ease);
+}
+.stat:hover{background:#101015}
+.stat:hover::after{transform:scaleX(1)}
+.stat-num{
+  font-family:var(--font-dis);
+  font-weight:900;
+  font-size:clamp(1.7rem,4vw,2.6rem);
+  color:var(--accent);
+  text-shadow:0 0 24px rgba(var(--accent-rgb),.5);
+  font-variant-numeric:tabular-nums;
+}
+.stat-lbl{
+  margin-top:8px;font-size:10.5px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--dim);
+}
+
+/* ============================================================
+   09. SKILLS
+   ============================================================ */
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:26px 54px;
+}
+.skill{margin-bottom:4px}
+.skill-top{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:12.5px;letter-spacing:.08em;margin-bottom:9px;
+}
+.skill-name{color:var(--fg)}
+.skill-val{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700}
+.skill-bar{
+  height:6px;background:rgba(255,255,255,.07);
+  position:relative;overflow:hidden;
+}
+.skill-bar i{
+  position:absolute;inset:0 auto 0 0;width:0;
+  background:linear-gradient(90deg, rgba(var(--accent-rgb),.35), var(--accent));
+  box-shadow:0 0 16px rgba(var(--accent-rgb),.75);
+  transition:width 1.5s var(--ease);
+}
+.skill-bar i::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);
+  transform:translateX(-100%);
+  animation:shine 2.6s ease-in-out infinite;
+}
+@keyframes shine{0%{transform:translateX(-100%)}60%,100%{transform:translateX(320%)}}
+
+/* ============================================================
+   10. PROJECT CARDS
+   ============================================================ */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+  perspective:1200px;
+}
+.card{
+  position:relative;
+  padding:26px 24px 24px;
+  background:linear-gradient(160deg, rgba(20,20,26,.92), rgba(8,8,11,.92));
+  border:1px solid var(--line);
+  overflow:hidden;
+  transform-style:preserve-3d;
+  transition:border-color .4s, box-shadow .4s, transform .18s ease-out;
+  will-change:transform;
+}
+.card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%), rgba(var(--accent-rgb),.14), transparent 45%);
+  opacity:0;transition:opacity .4s;
+  pointer-events:none;
+}
+.card:hover{border-color:rgba(var(--accent-rgb),.55);box-shadow:0 18px 60px -20px rgba(var(--accent-rgb),.6)}
+.card:hover::before{opacity:1}
+.card-idx{
+  font-size:10px;letter-spacing:.28em;color:var(--accent);
+  opacity:.7;
+}
+.card-title{
+  font-family:var(--font-dis);
+  font-weight:700;font-size:1.02rem;letter-spacing:.05em;
+  margin:12px 0 10px;
+  text-transform:uppercase;
+}
+.card-desc{font-size:12.8px;color:#9a9aa6;line-height:1.75}
+.card-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+.tag{
+  font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  padding:4px 9px;
+  border:1px solid rgba(var(--accent-rgb),.32);
+  color:var(--accent);
+  background:rgba(var(--accent-rgb),.05);
+}
+.card-go{
+  margin-top:20px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--dim);display:inline-flex;gap:8px;align-items:center;
+  transition:color .3s, gap .3s;
+}
+.card:hover .card-go{color:var(--accent);gap:14px}
+
+/* ============================================================
+   11. TERMINAL
+   ============================================================ */
+.term{
+  border:1px solid rgba(var(--accent-rgb),.3);
+  background:rgba(4,4,6,.86);
+  backdrop-filter:blur(6px);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.6),
+    0 30px 90px -30px rgba(var(--accent-rgb),.55),
+    inset 0 0 90px rgba(var(--accent-rgb),.045);
+  overflow:hidden;
+}
+.term-bar{
+  display:flex;align-items:center;gap:9px;
+  padding:11px 15px;
+  background:linear-gradient(to bottom,#16161c,#0d0d11);
+  border-bottom:1px solid var(--line);
+}
+.term-bar .dot{width:11px;height:11px;border-radius:50%}
+.term-bar .dot.r{background:#ff5f57}
+.term-bar .dot.y{background:#febc2e}
+.term-bar .dot.g{background:#28c840}
+.term-title{
+  margin-left:10px;font-size:11px;letter-spacing:.13em;
+  color:var(--dim);text-transform:lowercase;
+}
+.term-body{
+  padding:20px 18px 24px;
+  height:clamp(300px,46vh,430px);
+  overflow-y:auto;
+  font-size:13px;
+  line-height:1.85;
+  scrollbar-width:thin;
+}
+.term-out{white-space:pre-wrap;word-break:break-word}
+.term-out .ln{display:block}
+.term-out .ok{color:#00ff9c}
+.term-out .err{color:#ff4d4d}
+.term-out .warn{color:#ffcc00}
+.term-out .acc{color:var(--accent)}
+.term-out .mut{color:var(--dim)}
+.term-line{display:flex;align-items:center;gap:9px;margin-top:6px}
+.term-ps1{color:var(--accent);white-space:nowrap;text-shadow:0 0 10px rgba(var(--accent-rgb),.6)}
+#termInput{flex:1;min-width:40px;caret-color:var(--accent)}
+#termInput::placeholder{color:#3a3a44}
+
+/* ============================================================
+   12. FOOTER
+   ============================================================ */
+footer{
+  border-top:1px solid var(--line);
+  padding:56px 0 40px;
+  background:linear-gradient(to bottom, transparent, rgba(var(--accent-rgb),.035));
+}
+.foot-grid{
+  display:flex;flex-wrap:wrap;gap:34px;
+  justify-content:space-between;align-items:flex-start;
+}
+.foot-brand{
+  font-family:var(--font-dis);
+  font-weight:900;letter-spacing:.16em;font-size:1.05rem;
+  color:var(--accent);
+  text-shadow:0 0 20px rgba(var(--accent-rgb),.5);
+}
+.foot-note{font-size:12px;color:var(--dim);margin-top:10px;max-width:340px;line-height:1.8}
+.foot-col h4{
+  font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:14px;font-weight:400;
+}
+.foot-col a{
+  display:block;font-size:12.5px;color:#b6b6c0;margin-bottom:9px;
+  transition:color .3s, transform .3s var(--ease);
+}
+.foot-col a:hover{color:var(--accent);transform:translateX(5px)}
+.foot-bottom{
+  margin-top:44px;padding-top:22px;
+  border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:14px;
+  justify-content:space-between;align-items:center;
+  font-size:11px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;
+}
+.foot-bottom .blink{animation:led 2s ease-in-out infinite}
+
+.socials{display:flex;gap:12px;margin-top:20px}
+.social{
+  width:42px;height:42px;
+  display:grid;place-items:center;
+  border:1px solid var(--line);
+  color:var(--dim);
+  transition:all .35s var(--ease);
+}
+.social:hover{
+  color:#000;background:var(--accent);border-color:var(--accent);
+  box-shadow:0 0 26px rgba(var(--accent-rgb),.65);
+  transform:translateY(-4px);
+}
+
+/* ============================================================
+   13. FLOATING CONTROLS
+   ============================================================ */
+.dock{
+  position:fixed;right:clamp(12px,2vw,24px);bottom:clamp(12px,2vw,24px);
+  z-index:950;display:flex;flex-direction:column;gap:10px;
+}
+.dock button{
+  width:46px;height:46px;
+  display:grid;place-items:center;
+  border:1px solid var(--line);
+  background:rgba(8,8,11,.85);
+  backdrop-filter:blur(8px);
+  color:var(--dim);
+  transition:all .35s var(--ease);
+}
+.dock button:hover{
+  color:#000;background:var(--accent);border-color:var(--accent);
+  box-shadow:0 0 26px rgba(var(--accent-rgb),.6);
+  transform:translateY(-3px);
+}
+.dock button.on{color:var(--accent);border-color:rgba(var(--accent-rgb),.6)}
+.eq{display:flex;align-items:flex-end;gap:2px;height:16px}
+.eq i{width:3px;background:currentColor;height:4px;animation:eq 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.15s}
+.eq i:nth-child(3){animation-delay:.3s}
+.eq i:nth-child(4){animation-delay:.45s}
+@keyframes eq{0%,100%{height:4px}50%{height:15px}}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,140%);
+  z-index:10002;
+  padding:12px 22px;
+  background:rgba(8,8,11,.95);
+  border:1px solid rgba(var(--accent-rgb),.55);
+  color:var(--accent);
+  font-size:12px;letter-spacing:.13em;text-transform:uppercase;
+  box-shadow:0 0 40px rgba(var(--accent-rgb),.45);
+  transition:transform .55s var(--ease);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.toast.show{transform:translate(-50%,0)}
+
+/* ============================================================
+   14. RESPONSIVE
+   ============================================================ */
+@media (max-width:900px){
+  .hud-metric,.hud-clock{display:none}
+  .skills-grid{gap:20px}
+}
+@media (max-width:640px){
+  body{font-size:14px}
+  .hud{padding:10px 14px;gap:12px}
+  .hud-brand{font-size:11px;letter-spacing:.12em}
+  .hud-status{font-size:10px}
+  .themes{display:none}
+  .hero{padding-top:100px}
+  .cta .btn{width:100%;justify-content:center}
+  .term-body{font-size:12px;padding:16px 13px}
+  .scroll-cue{display:none}
+}
+
+/* ============================================================
+   15. REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  .fx-noise,.fx-scanbar{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ══════════ BOOT ══════════ -->
+<div class="boot" id="boot">
+  <div class="boot-inner">
+    <pre class="boot-log" id="bootLog"></pre>
+    <div class="boot-bar"><i id="bootBar"></i></div>
+    <div class="boot-hint">[ tıkla veya bir tuşa bas → atla ]</div>
+  </div>
+</div>
+
+<!-- ══════════ FX LAYERS ══════════ -->
+<div class="bg-glow"></div>
+<div class="grid-floor"></div>
+<canvas id="matrixCanvas"></canvas>
+<canvas id="netCanvas"></canvas>
+<div class="fx-scanlines"></div>
+<div class="fx-vignette"></div>
+<div class="fx-noise"></div>
+<div class="fx-scanbar"></div>
+
+<!-- ══════════ CURSOR ══════════ -->
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<div class="progress" id="progress"></div>
+
+<!-- ══════════ HUD ══════════ -->
+<header class="hud" id="hud">
+  <div class="hud-brand">KH0NTK4R <span>// DEP0</span></div>
+  <div class="hud-status"><i class="led"></i> SYSTEM ONLINE</div>
+  <div class="hud-spacer"></div>
+  <div class="hud-metric">CPU <span class="hud-meter"><i id="cpuBar"></i></span></div>
+  <div class="hud-clock" id="clock">--:--:--</div>
+  <div class="themes">
+    <button data-accent="red"    title="Red"    aria-label="Kırmızı tema"></button>
+    <button data-accent="green"  title="Green"  aria-label="Yeşil tema"></button>
+    <button data-accent="cyan"   title="Cyan"   aria-label="Camgöbeği tema"></button>
+    <button data-accent="purple" title="Purple" aria-label="Mor tema"></button>
+    <button data-accent="amber"  title="Amber"  aria-label="Amber tema"></button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero" id="home">
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div class="avatar-ring two"></div>
+      <img class="avatar"
+           src="https://avatars1.githubusercontent.com/u/56101811?s=460&v=4"
+           alt="KHONTKAR avatar"
+           width="220" height="220">
+    </div>
+
+    <h1 class="glitch" data-text="KH0NTK4R">KH0NTK4R</h1>
+
+    <p class="hero-tag">
+      <span class="ps1">root@khontkar:~$</span><span id="typewriter"></span><span class="caret"></span>
+    </p>
+
+    <p class="hero-desc">
+      <b>SECURITY [DEP0]</b> — Web &amp; Hacking · Defacer · Pentester.
+      Offensive security odaklı araştırma, sızma testi ve açık kaynak araç geliştirme.
+    </p>
+
+    <div class="cta">
+      <a class="btn" href="#terminal">./launch_terminal</a>
+      <a class="btn ghost" href="https://github.com/khontkar" target="_blank" rel="noopener noreferrer">github ↗</a>
+    </div>
+
+    <div class="scroll-cue"><span>scroll</span><i></i></div>
+  </section>
+
+  <!-- ══════════ STATS ══════════ -->
+  <section id="stats">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-tag">01 / telemetry</div>
+        <h2 class="sec-title">Sistem <em>Metrikleri</em></h2>
+      </div>
+
+      <div class="stats reveal">
+        <div class="stat">
+          <div class="stat-num" data-count="10" data-suffix="+">0</div>
+          <div class="stat-lbl">Yıl Deneyim</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" data-count="250" data-suffix="+">0</div>
+          <div class="stat-lbl">Pentest / Audit</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" data-count="64" data-suffix="">0</div>
+          <div class="stat-lbl">Repo / Tool</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" data-count="99" data-suffix="%">0</div>
+          <div class="stat-lbl">Uptime</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ SKILLS ══════════ -->
+  <section id="skills">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-tag">02 / capabilities</div>
+        <h2 class="sec-title">Yetenek <em>Matrisi</em></h2>
+        <p class="sec-sub">Sürekli güncellenen, sahada test edilmiş yetkinlik seti.</p>
+      </div>
+
+      <div class="skills-grid reveal" id="skillsGrid">
+        <!-- JS ile doldurulur -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ PROJECTS ══════════ -->
+  <section id="projects">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-tag">03 / repository</div>
+        <h2 class="sec-title">Öne Çıkan <em>Projeler</em></h2>
+        <p class="sec-sub">Açık kaynak araçlar, araştırma notları ve güvenlik yazılımları.</p>
+      </div>
+
+      <div class="cards reveal" id="cards">
+        <!-- JS ile doldurulur -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TERMINAL ══════════ -->
+  <section id="terminal">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-tag">04 / interactive shell</div>
+        <h2 class="sec-title">Canlı <em>Terminal</em></h2>
+        <p class="sec-sub">Komutları deneyin — <span style="color:var(--accent)">help</span> ile başlayın.</p>
+      </div>
+
+      <div class="term reveal" id="term">
+        <div class="term-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="term-title">guest@khontkar: ~/repo — zsh</span>
+        </div>
+        <div class="term-body" id="termBody">
+          <div class="term-out" id="termOut"></div>
+          <div class="term-line">
+            <span class="term-ps1">guest@khontkar:~$</span>
+            <input id="termInput" type="text" autocomplete="off" autocapitalize="off"
+                   spellcheck="false" aria-label="Terminal komut girişi"
+                   placeholder="komut yaz...">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">KH0NTK4R SECURITY [DEP0]</div>
+        <p class="foot-note">
+          Offensive security · red team · web exploitation.
+          Tüm testler yalnızca yetkili sistemlerde gerçekleştirilir.
+        </p>
+        <div class="socials">
+          <a class="social" href="https://github.com/khontkar" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="foot-col">
+        <h4>Navigasyon</h4>
+        <a href="#home">./home</a>
+        <a href="#stats">./stats</a>
+        <a href="#skills">./skills</a>
+        <a href="#projects">./projects</a>
+        <a href="#terminal">./terminal</a>
+      </div>
+
+      <div class="foot-col">
+        <h4>Kaynaklar</h4>
+        <a href="https://github.com/khontkar" target="_blank" rel="noopener noreferrer">github.com/khontkar ↗</a>
+        <a href="https://khontkar.github.io" target="_blank" rel="noopener noreferrer">khontkar.github.io ↗</a>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© 2015 — ∞ KH0NTK4R</span>
+      <span class="blink">[ connection secured ]</span>
+      <span id="uptime">uptime: 00:00:00</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ DOCK ══════════ -->
+<div class="dock">
+  <button id="soundBtn" title="Ses" aria-label="Sesi aç/kapat">
+    <span class="eq"><i></i><i></i><i></i><i></i></span>
+  </button>
+  <button id="topBtn" title="Yukarı" aria-label="Başa dön">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<audio id="bgm" loop preload="none">
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+(function () {
+'use strict';
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rand  = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINE_POINTER = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+/* Global accent state (canvas'lar için) */
+const ACCENTS = {
+  red:    { hex: '#ff0033', rgb: '255,0,51'   },
+  green:  { hex: '#00ff88', rgb: '0,255,136'  },
+  cyan:   { hex: '#00e5ff', rgb: '0,229,255'  },
+  purple: { hex: '#b14cff', rgb: '177,76,255' },
+  amber:  { hex: '#ffb000', rgb: '255,176,0'  }
+};
+let ACCENT_HEX = ACCENTS.red.hex;
+
+/* Toast */
+const toastEl = $('#toast');
+let toastTimer;
+function toast(msg, ms = 2200) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
+}
+
+/* ============================================================
+   1. BOOT SEQUENCE
+   ============================================================ */
+(function boot() {
+  const bootEl  = $('#boot');
+  const logEl   = $('#bootLog');
+  const barEl   = $('#bootBar');
+
+  const lines = [
+    '[ OK ] Initializing kernel modules ..............',
+    '[ OK ] Mounting /dev/khontkar ...................',
+    '[ OK ] Loading crypto engine (AES-256-GCM) ......',
+    '[ OK ] Starting network stack 10.0.0.1/24 .......',
+    '[ OK ] Spawning shell -> /bin/zsh ...............',
+    '[ !! ] WARNING: unauthorized access is logged ...',
+    '[ OK ] Access granted. Welcome, guest.'
+  ];
+
+  let skipped = false;
+  let finished = false;
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    bootEl.classList.add('done');
+    setTimeout(() => bootEl.remove(), 700);
+  }
+
+  function skip() {
+    if (finished) return;
+    skipped = true;
+    logEl.textContent = lines.join('\n') + '\n';
+    barEl.style.width = '100%';
+    finish();
+  }
+
+  bootEl.addEventListener('click', skip);
+  window.addEventListener('keydown', skip, { once: true });
+  window.addEventListener('wheel', skip, { once: true, passive: true });
+
+  (async function run() {
+    if (REDUCED) { skip(); return; }
+    barEl.style.transition = 'width 1.7s linear';
+    requestAnimationFrame(() => { barEl.style.width = '100%'; });
+
+    for (const line of lines) {
+      if (skipped) return;
+      const span = document.createElement('span');
+      span.textContent = line + '\n';
+      if (line.indexOf('[ !! ]') === 0) span.className = 'warn';
+      logEl.appendChild(span);
+      await sleep(rand(140, 260));
+    }
+    await sleep(320);
+    finish();
+  })();
+})();
+
+/* ============================================================
+   2. MATRIX RAIN
+   ============================================================ */
+const Matrix = (function () {
+  const canvas = $('#matrixCanvas');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ｱｲｳｴｵ<>/\\|=+*#$%&@'.split('');
+  const FONT_SIZE = 15;
+
+  let W = 0, H = 0, cols = 0, drops = [], speed = 1;
+  let running = true;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width  = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    cols = Math.ceil(W / FONT_SIZE);
+    drops = new Array(cols).fill(0).map(() => Math.floor(Math.random() * -60));
+    ctx.fillStyle = '#050506';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function draw() {
+    if (!running) return;
+
+    ctx.fillStyle = 'rgba(5,5,6,0.075)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.font = FONT_SIZE + 'px monospace';
+    ctx.textBaseline = 'top';
+
+    for (let i = 0; i < cols; i++) {
+      const ch = CHARS[(Math.random() * CHARS.length) | 0];
+      const x = i * FONT_SIZE;
+      const y = drops[i] * FONT_SIZE;
+
+      if (Math.random() > 0.975) {
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = ACCENT_HEX;
+        ctx.shadowBlur = 12;
+      } else {
+        ctx.fillStyle = ACCENT_HEX;
+        ctx.shadowBlur = 0;
+      }
+      ctx.globalAlpha = 0.55;
+      ctx.fillText(ch, x, y);
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
+      if (y > H && Math.random() > 0.975) drops[i] = 0;
+      drops[i] += speed;
+    }
+  }
+
+  let acc = 0, last = performance.now();
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (!running) { last = now; return; }
+    const dt = now - last;
+    last = now;
+    acc += dt;
+    if (acc >= 40) { acc = 0; draw(); }
+  }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+
+  resize();
+  if (!REDUCED) requestAnimationFrame(loop);
+
+  return {
+    setSpeed(v) { speed = v; },
+    burst(ms = 4000) {
+      speed = 6;
+      setTimeout(() => { speed = 1; }, ms);
+    },
+    toggle() {
+      running = !running;
+      if (running) { last = performance.now(); }
+      return running;
+    },
+    isRunning() { return running; },
+    redraw() { resize(); }
+  };
+})();
+
+/* ============================================================
+   3. PARTICLE NETWORK
+   ============================================================ */
+const Net = (function () {
+  const canvas = $('#netCanvas');
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0, dpr = 1;
+  let nodes = [];
+  let running = true;
+  const mouse = { x: -9999, y: -9999 };
+
+  function build() {
+    const count = clamp(Math.floor(W / 17), 26, 96);
+    nodes = new Array(count).fill(0).map(() => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: rand(-0.28, 0.28),
+      vy: rand(-0.28, 0.28),
+      r: rand(0.8, 2.0)
+    }));
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width  = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    build();
+  }
+
+  const LINK = 132;
+
+  function draw() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      n.x += n.vx;
+      n.y += n.vy;
+
+      if (n.x < -30) n.x = W + 30;
+      if (n.x > W + 30) n.x = -30;
+      if (n.y < -30) n.y = H + 30;
+      if (n.y > H + 30) n.y = -30;
+
+      /* mouse etkileşimi */
+      const dxm = n.x - mouse.x;
+      const dym = n.y - mouse.y;
+      const dm = Math.hypot(dxm, dym);
+      if (dm < 140 && dm > 0.01) {
+        const f = (140 - dm) / 140 * 0.9;
+        n.x += (dxm / dm) * f;
+        n.y += (dym / dm) * f;
+      }
+    }
+
+    /* bağlantı çizgileri */
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d = Math.hypot(dx, dy);
+        if (d < LINK) {
+          const o = (1 - d / LINK) * 0.32;
+          ctx.strokeStyle = 'rgba(' + ACCENTS[currentTheme].rgb + ',' + o + ')';
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    /* noktalar */
+    for (const n of nodes) {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + ACCENTS[currentTheme].rgb + ',0.75)';
+      ctx.fill();
+    }
+  }
+
+  let last = performance.now(), acc = 0;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (!running) { last = now; return; }
+    const dt = now - last; last = now; acc += dt;
+    if (acc >= 33) { acc = 0; draw(); }
+  }
+
+  window.addEventListener('resize', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+  window.addEventListener('pointermove', e => {
+    mouse.x = e.clientX; mouse.y = e.clientY;
+  }, { passive: true });
+  window.addEventListener('pointerleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+  resize();
+  if (!REDUCED) requestAnimationFrame(loop);
+
+  return {
+    toggle() {
+      running = !running;
+      if (!running) ctx.clearRect(0, 0, W, H);
+      else last = performance.now();
+      return running;
+    },
+    isRunning() { return running; }
+  };
+})();
+
+/* ============================================================
+   4. CUSTOM CURSOR
+   ============================================================ */
+(function cursor() {
+  if (!FINE_POINTER) return;
+  const dot  = $('#cursorDot');
+  const ring = $('#cursorRing');
+  document.documentElement.classList.add('has-cursor');
+
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let rx = mx, ry = my;
+
+  window.addEventListener('pointermove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform = 'translate(' + mx + 'px,' + my + 'px)';
+  }, { passive: true });
+
+  (function loop() {
+    rx += (mx - rx) * 0.16;
+    ry += (my - ry) * 0.16;
+    ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px)';
+    requestAnimationFrame(loop);
+  })();
+
+  document.addEventListener('pointerover', e => {
+    const hot = e.target.closest('a, button, input, .card, .stat, .term');
+    document.body.classList.toggle('cursor-hot', !!hot);
+  });
+})();
+
+/* ============================================================
+   5. THEME SWITCHER
+   ============================================================ */
+let currentTheme = 'red';
+(function themes() {
+  const root = document.documentElement;
+
+  function apply(name) {
+    const t = ACCENTS[name];
+    if (!t) return;
+    currentTheme = name;
+    ACCENT_HEX = t.hex;
+    root.style.setProperty('--accent', t.hex);
+    root.style.setProperty('--accent-rgb', t.rgb);
+    document.querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', '#050506');
+  }
+
+  $$('.themes button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      apply(btn.dataset.accent);
+      toast('theme → ' + btn.dataset.accent);
+    });
+  });
+
+  apply('red');
+
+  /* Terminal için dışa aktar */
+  window.__applyTheme = apply;
+})();
+
+/* ============================================================
+   6. HUD — CLOCK / CPU / PROGRESS / UPTIME
+   ============================================================ */
+(function hud() {
+  const clockEl   = $('#clock');
+  const uptimeEl  = $('#uptime');
+  const cpuBar    = $('#cpuBar');
+  const progress  = $('#progress');
+  const hudEl     = $('#hud');
+
+  const started = Date.now();
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const d = new Date();
+    clockEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+
+    const s = Math.floor((Date.now() - started) / 1000);
+    uptimeEl.textContent = 'uptime: ' + pad(Math.floor(s / 3600)) + ':' +
+      pad(Math.floor((s % 3600) / 60)) + ':' + pad(s % 60);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  /* Fake CPU meter */
+  function cpu() {
+    cpuBar.style.width = rand(18, 78).toFixed(0) + '%';
+  }
+  cpu();
+  setInterval(cpu, 1600);
+
+  /* Scroll progress */
+  function onScroll() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const p = max > 0 ? (window.scrollY / max) * 100 : 0;
+    progress.style.width = p + '%';
+    hudEl.classList.toggle('scrolled', window.scrollY > 40);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+/* ============================================================
+   7. TYPEWRITER
+   ============================================================ */
+(function typewriter() {
+  const el = $('#typewriter');
+  const phrases = [
+    'Web & Hacking Defacer Pentester',
+    'Security Researcher',
+    'Bug Bounty Hunter',
+    'CTF Player',
+    'Malware Analyst',
+    'Red Team Operator'
+  ];
+  let p = 0, i = 0, deleting = false;
+
+  if (REDUCED) { el.textContent = phrases[0]; return; }
+
+  (function step() {
+    const full = phrases[p];
+
+    if (!deleting) {
+      el.textContent = full.slice(0, ++i);
+      if (i === full.length) {
+        deleting = true;
+        return setTimeout(step, 1900);
+      }
+      return setTimeout(step, rand(45, 95));
+    }
+
+    el.textContent = full.slice(0, --i);
+    if (i === 0) {
+      deleting = false;
+      p = (p + 1) % phrases.length;
+      return setTimeout(step, 320);
+    }
+    setTimeout(step, 26);
+  })();
+})();
+
+/* ============================================================
+   8. SCROLL REVEAL + COUNTERS + SKILL BARS
+   ============================================================ */
+(function reveal() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('in');
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+  $$('.reveal').forEach(el => io.observe(el));
+})();
+
+(function counters() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const el = en.target;
+      io.unobserve(el);
+
+      const target = parseFloat(el.dataset.count) || 0;
+      const suffix = el.dataset.suffix || '';
+      const dur = 1500;
+      const t0 = performance.now();
+
+      (function run(now) {
+        const k = clamp((now - t0) / dur, 0, 1);
+        const eased = 1 - Math.pow(1 - k, 3);
+        el.textContent = Math.round(target * eased) + suffix;
+        if (k < 1) requestAnimationFrame(run);
+      })(t0);
+    });
+  }, { threshold: 0.5 });
+
+  $$('[data-count]').forEach(el => io.observe(el));
+})();
+
+/* ============================================================
+   9. SKILLS RENDER
+   ============================================================ */
+(function skills() {
+  const data = [
+    { name: 'Web Application Pentest', v: 94 },
+    { name: 'Network Security',        v: 88 },
+    { name: 'OSINT & Recon',           v: 91 },
+    { name: 'Bug Bounty',              v: 89 },
+    { name: 'Malware Analysis',        v: 76 },
+    { name: 'Reverse Engineering',     v: 72 },
+    { name: 'Linux / Hardening',       v: 90 },
+    { name: 'Automation & Tooling',    v: 85 }
+  ];
+
+  const grid = $('#skillsGrid');
+  grid.innerHTML = data.map(s => `
+    <div class="skill">
+      <div class="skill-top">
+        <span class="skill-name">${s.name}</span>
+        <span class="skill-val" data-val="${s.v}">0%</span>
+      </div>
+      <div class="skill-bar"><i data-w="${s.v}"></i></div>
+    </div>
+  `).join('');
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      io.unobserve(en.target);
+
+      $$('.skill-bar i', grid).forEach((bar, idx) => {
+        const w = bar.dataset.w;
+        setTimeout(() => { bar.style.width = w + '%'; }, idx * 110);
+      });
+
+      $$('.skill-val', grid).forEach((val, idx) => {
+        const target = parseInt(val.dataset.val, 10);
+        setTimeout(() => {
+          const t0 = performance.now();
+          (function run(now) {
+            const k = clamp((now - t0) / 1400, 0, 1);
+            const e = 1 - Math.pow(1 - k, 3);
+            val.textContent = Math.round(target * e) + '%';
+            if (k < 1) requestAnimationFrame(run);
+          })(t0);
+        }, idx * 110);
+      });
+    });
+  }, { threshold: 0.25 });
+
+  io.observe(grid);
+})();
+
+/* ============================================================
+   10. PROJECT CARDS + 3D TILT
+   ============================================================ */
+(function projects() {
+  const data = [
+    {
+      t: 'KH0NTK4R Web Shell',
+      d: 'Yetkili sızma testleri için hafif, modüler web shell & post-exploitation arayüzü.',
+      tags: ['PHP', 'Pentest', 'Post-Exploit']
+    },
+    {
+      t: 'Recon Suite',
+      d: 'Subdomain enumeration, port tarama ve OSINT toplama süreçlerini tek hatta birleştiren araç seti.',
+      tags: ['Python', 'OSINT', 'Recon']
+    },
+    {
+      t: 'RedKeys Music',
+      d: 'Siberpunk estetiğinde dijital içerik platformu — tasarım & frontend altyapısı.',
+      tags: ['Frontend', 'UI/UX', 'Web']
+    },
+    {
+      t: 'Log Analyzer',
+      d: 'Büyük hacimli erişim loglarında anomali ve saldırı imzası tespiti yapan analiz motoru.',
+      tags: ['Go', 'Blue Team', 'Analytics']
+    },
+    {
+      t: 'Payload Lab',
+      d: 'CTF ve lab ortamları için zafiyet doğrulama payload koleksiyonu ve dokümantasyon.',
+      tags: ['Security', 'CTF', 'Docs']
+    },
+    {
+      t: 'khontkar.github.io',
+      d: 'Kişisel portfolyo ve araştırma notlarının yayınlandığı statik site.',
+      tags: ['HTML', 'CSS', 'JS']
+    }
+  ];
+
+  const wrap = $('#cards');
+  wrap.innerHTML = data.map((p, i) => `
+    <a class="card" href="https://github.com/khontkar" target="_blank" rel="noopener noreferrer">
+      <div class="card-idx">0${i + 1} / repo</div>
+      <h3 class="card-title">${p.t}</h3>
+      <p class="card-desc">${p.d}</p>
+      <div class="card-tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <span class="card-go">görüntüle <span>→</span></span>
+    </a>
+  `).join('');
+
+  /* Tilt */
+  if (!FINE_POINTER || REDUCED) return;
+
+  $$('.card', wrap).forEach(card => {
+    let raf = null;
+
+    card.addEventListener('pointermove', e => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+
+      card.style.setProperty('--mx', (px * 100) + '%');
+      card.style.setProperty('--my', (py * 100) + '%');
+
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        const rx = (0.5 - py) * 11;
+        const ry = (px - 0.5) * 11;
+        card.style.transform =
+          'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-6px)';
+      });
+    });
+
+    card.addEventListener('pointerleave', () => {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      card.style.transform = '';
+    });
+  });
+})();
+
+/* ============================================================
+   11. INTERACTIVE TERMINAL
+   ============================================================ */
+const Terminal = (function () {
+  const body   = $('#termBody');
+  const out    = $('#termOut');
+  const input  = $('#termInput');
+  const term   = $('#term');
+
+  const history = [];
+  let hIdx = -1;
+
+  const BANNER = [
+    ' _  __ _   _  ___  _   _ _____ _  __    _    ____  ',
+    '| |/ /| | | |/ _ \\| \\ | |_   _| |/ /   / \\  |  _ \\ ',
+    "| ' / | |_| | | | |  \\| | | | | ' /   / _ \\ | |_) |",
+    '| . \\ |  _  | |_| | |\\  | | | | . \\  / ___ \\|  _ < ',
+    '|_|\\_\\|_| |_|\\___/|_| \\_| |_| |_|\\_\\/_/   \\_\\_| \\_\\'
+  ].join('\n');
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function print(text, cls) {
+    const span = document.createElement('span');
+    span.className = 'ln' + (cls ? ' ' + cls : '');
+    span.innerHTML = esc(text);
+    out.appendChild(span);
+    scroll();
+  }
+
+  function printHTML(html) {
+    const span = document.createElement('span');
+    span.className = 'ln';
+    span.innerHTML = html;
+    out.appendChild(span);
+    scroll();
+  }
+
+  function scroll() { body.scrollTop = body.scrollHeight; }
+
+  function clear() { out.innerHTML = ''; }
+
+  /* ---------- COMMANDS ---------- */
+  const CMDS = {
+    help() {
+      print('Kullanılabilir komutlar:', 'acc');
+      const rows = [
+        ['help',      'bu listeyi göster'],
+        ['whoami',    'kimlik bilgisi'],
+        ['skills',    'yetenek listesi'],
+        ['projects',  'repo / proje listesi'],
+        ['contact',   'iletişim & linkler'],
+        ['theme',     'tema değiştir → theme <red|green|cyan|purple|amber>'],
+        ['matrix',    'matrix yağmurunu aç/kapat'],
+        ['net',       'parçacık ağını aç/kapat'],
+        ['sound',     'sesi aç/kapat'],
+        ['banner',    'ascii banner'],
+        ['date',      'sistem saati'],
+        ['clear',     'ekranı temizle'],
+        ['sudo',      '...denemeye değer']
+      ];
+      rows.forEach(r => print('  ' + r[0].padEnd(12, ' ') + '— ' + r[1], 'mut'));
+    },
+
+    whoami() {
+      print('guest', 'ok');
+      print('uid=1000(guest) gid=1000(guest) groups=guest,security,research', 'mut');
+      print('host: khontkar-node-01  ·  kernel: 6.6.0-sec  ·  shell: zsh', 'mut');
+      print('NOT: gerçek kimlik için yetki gerekir.', 'warn');
+    },
+
+    skills() {
+      print('Yetenek matrisi:', 'acc');
+      [
+        ['Web Application Pentest', 94],
+        ['Network Security',        88],
+        ['OSINT & Recon',           91],
+        ['Bug Bounty',              89],
+        ['Malware Analysis',        76],
+        ['Reverse Engineering',     72],
+        ['Linux / Hardening',       90],
+        ['Automation & Tooling',    85]
+      ].forEach(([n, v]) => {
+        const filled = Math.round(v / 5);
+        const bar = '█'.repeat(filled) + '░'.repeat(20 - filled);
+        print('  ' + n.padEnd(26, ' ') + bar + '  ' + v + '%');
+      });
+    },
+
+    projects() {
+      print('Repository listesi:', 'acc');
+      [
+        ['khontkar.github.io', 'Kişisel portfolyo & araştırma notları'],
+        ['recon-suite',        'OSINT / subdomain / port tarama araç seti'],
+        ['log-analyzer',       'Anomali & saldırı imzası tespiti'],
+        ['payload-lab',        'CTF & lab payload koleksiyonu'],
+        ['web-shell',          'Yetkili testler için modüler arayüz']
+      ].forEach(([n, d]) => {
+        print('  ▸ ' + n, 'ok');
+        print('     ' + d, 'mut');
+      });
+      print('  → https://github.com/khontkar', 'acc');
+    },
+
+    contact() {
+      print('İletişim kanalları:', 'acc');
+      print('  GitHub  : https://github.com/khontkar', 'ok');
+      print('  Web     : https://khontkar.github.io', 'ok');
+      print('  Durum   : yalnızca yetkili test talepleri kabul edilir.', 'warn');
+    },
+
+    theme(args) {
+      const name = (args[0] || '').toLowerCase();
+      if (!ACCENTS[name]) {
+        print('kullanım: theme <red|green|cyan|purple|amber>', 'err');
+        return;
+      }
+      window.__applyTheme(name);
+      print('tema değiştirildi → ' + name, 'ok');
+    },
+
+    matrix() {
+      const on = Matrix.toggle();
+      print('matrix rain: ' + (on ? 'ON' : 'OFF'), on ? 'ok' : 'warn');
+    },
+
+    net() {
+      const on = Net.toggle();
+      print('particle net: ' + (on ? 'ON' : 'OFF'), on ? 'ok' : 'warn');
+    },
+
+    sound() {
+      const on = Audio.toggle();
+      print('audio: ' + (on ? 'ON' : 'OFF'), on ? 'ok' : 'warn');
+    },
+
+    banner() { print(BANNER, 'acc'); },
+
+    date() {
+      const d = new Date();
+      print(d.toString(), 'ok');
+    },
+
+    clear() { clear(); },
+
+    sudo() {
+      print('[sudo] password for guest: ********', 'mut');
+      print('guest is not in the sudoers file. This incident has been reported. 😈', 'err');
+    },
+
+    exit() {
+      print('Oturum kapatılamaz — buradan çıkış yok. 🕶️', 'warn');
+    }
+  };
+
+  /* ---------- EXEC ---------- */
+  function exec(raw) {
+    const line = raw.trim();
+    if (!line) return;
+
+    printHTML(
+      '<span class="acc">guest@khontkar:~$</span> <span>' + esc(line) + '</span>'
+    );
+
+    const parts = line.split(/\s+/);
+    const cmd = parts[0].toLowerCase();
+    const args = parts.slice(1);
+
+    if (Object.prototype.hasOwnProperty.call(CMDS, cmd)) {
+      try { CMDS[cmd](args); }
+      catch (e) { print('hata: ' + e.message, 'err'); }
+    } else {
+      print("komut bulunamadı: " + cmd + " — 'help' yazın.", 'err');
+    }
+  }
+
+  /* ---------- EVENTS ---------- */
+  term.addEventListener('click', e => {
+    if (window.getSelection().toString()) return;
+    if (e.target.tagName !== 'INPUT') input.focus();
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const v = input.value;
+      if (v.trim()) {
+        history.push(v.trim());
+        if (history.length > 60) history.shift();
+      }
+      hIdx = history.length;
+      input.value = '';
+      exec(v);
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!history.length) return;
+      hIdx = Math.max(0, hIdx - 1);
+      input.value = history[hIdx] || '';
+      input.setSelectionRange(input.value.length, input.value.length);
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!history.length) return;
+      hIdx = Math.min(history.length, hIdx + 1);
+      input.value = history[hIdx] || '';
+      return;
+    }
+
+    if (e.key === 'l' && e.ctrlKey) {
+      e.preventDefault();
+      clear();
+    }
+  });
+
+  /* ---------- INIT ---------- */
+  function init() {
+    print(BANNER, 'acc');
+    print('');
+    print('KH0NTK4R SECURITY [DEP0] — interactive shell v2.0', 'ok');
+    print("Komut listesi için 'help' yazın.", 'mut');
+    print('');
+  }
+
+  /* Terminal görünür olunca odaklan */
+  const io = new IntersectionObserver(en => {
+    if (en[0].isIntersecting && FINE_POINTER) input.focus({ preventScroll: true });
+  }, { threshold: 0.4 });
+  io.observe(term);
+
+  init();
+
+  return { exec, print };
+})();
+
+/* ============================================================
+   12. AUDIO
+   ============================================================ */
+const Audio = (function () {
+  const el  = $('#bgm');
+  const btn = $('#soundBtn');
+  let on = false;
+
+  function setUI() {
+    btn.classList.toggle('on', on);
+    btn.title = on ? 'Sesi kapat' : 'Sesi aç';
+  }
+
+  async function toggle() {
+    try {
+      if (on) { el.pause(); on = false; }
+      else { el.volume = 0.35; await el.play(); on = true; }
+    } catch (err) {
+      on = false;
+      toast('ses başlatılamadı');
+    }
+    setUI();
+    return on;
+  }
+
+  btn.addEventListener('click', () => { toggle(); });
+  setUI();
+
+  return { toggle, isOn: () => on };
+})();
+
+/* ============================================================
+   13. KONAMI CODE EASTER EGG
+   ============================================================ */
+(function konami() {
+  const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown',
+               'ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let idx = 0;
+
+  window.addEventListener('keydown', e => {
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (k === seq[idx]) {
+      idx++;
+      if (idx === seq.length) {
+        idx = 0;
+        trigger();
+      }
+    } else {
+      idx = (k === seq[0]) ? 1 : 0;
+    }
+  });
+
+  function trigger() {
+    toast('◈ ROOT MODE UNLOCKED ◈', 3600);
+    Matrix.burst(6000);
+    document.body.animate(
+      [{ filter: 'invert(0)' }, { filter: 'invert(1)' }, { filter: 'invert(0)' }],
+      { duration: 700, easing: 'steps(3)' }
+    );
+    Terminal.print('');
+    Terminal.print('[!] KONAMI CODE ACCEPTED — root mode 6 saniye aktif.', 'ok');
+  }
+})();
+
+/* ============================================================
+   14. DOCK BUTTONS
+   ============================================================ */
+(function dock() {
+  $('#topBtn').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+  });
+})();
+
+/* ============================================================
+   15. SMOOTH ANCHORS (offset for fixed HUD)
+   ============================================================ */
+(function anchors() {
+  $$('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id === '#' || id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      const top = target.getBoundingClientRect().top + window.scrollY - 70;
+      window.scrollTo({ top, behavior: REDUCED ? 'auto' : 'smooth' });
+    });
+  });
+})();
+
+/* ============================================================
+   16. VISIBILITY PAUSE
+   ============================================================ */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && Audio.isOn()) {
+    /* sekme arkada → sesi duraklat, geri gelince devam et */
+    const el = $('#bgm');
+    el.pause();
+    document.addEventListener('visibilitychange', function resume() {
+      if (!document.hidden && Audio.isOn()) el.play().catch(() => {});
+      document.removeEventListener('visibilitychange', resume);
+    });
+  }
+});
+
+})();
+</script>
+</body>
+</html>
